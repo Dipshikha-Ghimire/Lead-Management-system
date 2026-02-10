@@ -1,0 +1,15 @@
+:root {
+    --navy: #0d1b2a;
+    --gold: #fbbf24;
+    --light: #f3f4f6;
+}
+body { margin: 0; font-family: 'Inter', sans-serif; background: var(--light); display: flex; align-items: center; justify-content: center; height: 100vh; }
+.auth-card { background: white; display: flex; width: 800px; height: 500px; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+.auth-image { flex: 1; background: var(--navy); display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 2rem; font-weight: bold; padding: 40px; text-align: center; }
+.auth-content { flex: 1.2; padding: 40px; display: flex; flex-direction: column; justify-content: center; }
+.form-group { margin-bottom: 15px; }
+.form-label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; }
+.form-input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+.btn-primary { background: var(--navy); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px; }
+.btn-primary:hover { background: #1b263b; }
+a { color: var(--navy); text-decoration: none; font-size: 0.8rem; }

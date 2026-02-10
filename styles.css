@@ -1,0 +1,82 @@
+:root { 
+    --navy: #10192d; 
+    --gold: #fbbf24; 
+    --bg: #f4f7fe; 
+    --sidebar-active: #1e293b;
+}
+
+body { margin: 0; display: flex; background: var(--bg); font-family: 'Inter', sans-serif; color: #2d3748; }
+
+/* Sidebar & Profile Section */
+.sidebar { width: 260px; background: var(--navy); color: white; height: 100vh; position: fixed; display: flex; flex-direction: column; }
+.logo-area { padding: 30px 20px; }
+.nav-links { flex-grow: 1; padding: 0 10px; }
+.nav-links a { display: block; color: #a0aec0; padding: 12px; text-decoration: none; border-radius: 8px; margin-bottom: 5px; }
+.nav-links a.active { background: var(--sidebar-active); color: white; }
+
+.user-profile { padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; }
+.user-profile img { width: 35px; height: 35px; border-radius: 50%; }
+.user-info p { margin: 0; font-size: 0.85rem; font-weight: bold; }
+.user-info span { font-size: 0.75rem; color: #a0aec0; }
+
+/* Top Header */
+.top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+.search-bar { background: white; border-radius: 10px; padding: 10px 15px; width: 400px; display: flex; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+.search-bar input { border: none; outline: none; margin-left: 10px; width: 100%; }
+
+/* Funnel Styling */
+.funnel-container { background: white; padding: 25px; border-radius: 15px; margin-top: 20px; }
+.funnel-stage { margin-bottom: 15px; }
+.funnel-label { font-size: 0.85rem; margin-bottom: 5px; display: block; }
+.funnel-bar-bg { background: #edf2f7; height: 35px; border-radius: 6px; overflow: hidden; }
+.funnel-bar-fill { background: var(--navy); height: 100%; transition: width 0.5s ease-in; }
+
+/* Buttons from Screenshot */
+.btn-yellow { background: var(--gold); border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+.btn-outline { background: transparent; border: 1px solid white; color: white; padding: 10px 20px; border-radius: 8px; margin-left: 10px; cursor: pointer; }
+/* --- Add this at the bottom of your file --- */
+
+.welcome-card { 
+    background: linear-gradient(rgba(16, 25, 45, 0.7), rgba(16, 25, 45, 0.7)), 
+                url('assets/ku-building.jpg'); 
+    background-size: cover; 
+    background-position: center;
+    color: white; 
+    padding: 40px; 
+    border-radius: 15px; 
+    margin-bottom: 30px; 
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.welcome-card h1 {
+    margin: 0 0 10px 0;
+    font-size: 2rem;
+}
+
+.welcome-card p {
+    margin: 0 0 20px 0;
+    max-width: 600px;
+    line-height: 1.5;
+    font-size: 1rem;
+    opacity: 0.9;
+}
+<script>
+    const searchInput = document.querySelector('.search-bar input');
+    const tableRows = document.querySelectorAll('tbody tr');
+
+    searchInput.addEventListener('keyup', function(e) {
+        const term = e.target.value.toLowerCase();
+        
+        tableRows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            if (text.includes(term)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+</script>
