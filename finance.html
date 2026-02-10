@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Finance | KU Lead Manager</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo-area">
+            <h2 style="color: var(--gold); margin: 0;">Kathmandu</h2>
+            <p style="margin: 0; font-size: 0.7rem; letter-spacing: 2px;">UNIVERSITY</p>
+        </div>
+        <nav class="nav-links">
+            <a href="index.html">Dashboard</a>
+            <a href="leads.html">Leads</a>
+            <a href="applications.html">Applications</a>
+            <a href="exams.html">Exams</a>
+            <a href="finance.html" class="active">Finance</a>
+            <a href="#">Settings</a>
+        </nav>
+        <div class="user-profile">
+            <img src="https://ui-avatars.com/api/?name=Admin+User&background=random" alt="Admin">
+            <div class="user-info">
+                <p>Admin User</p>
+                <span>admin@ku.edu.np</span>
+            </div>
+        </div>
+    </div>
+
+    <main class="main-content" style="margin-left: 260px; padding: 40px; width: calc(100% - 260px);">
+        <div class="top-header">
+            <div class="search-bar">
+                <span>🔍</span>
+                <input type="text" id="financeSearch" placeholder="Search transactions, students, IDs...">
+            </div>
+            <div style="font-weight: bold; cursor: pointer;">Settings</div>
+        </div>
+
+        <div class="table-container">
+            <h2>Recent Transactions</h2>
+            <p style="color: #64748b; margin-bottom: 20px;">Tracking revenue and student fee payments.</p>
+            <table id="financeTable">
+                <thead>
+                    <tr>
+                        <th>Transaction ID</th>
+                        <th>Student</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>#TXN-8801</td>
+                        <td>Binod Rai</td>
+                        <td>NPR 125,000</td>
+                        <td>Feb 01, 2026</td>
+                    </tr>
+                    <tr>
+                        <td>#TXN-8802</td>
+                        <td>Maya Devi</td>
+                        <td>NPR 85,000</td>
+                        <td>Feb 02, 2026</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        const searchInput = document.getElementById('financeSearch');
+        const tableRows = document.querySelectorAll('#financeTable tbody tr');
+
+        searchInput.addEventListener('keyup', function() {
+            const filter = searchInput.value.toLowerCase();
+            tableRows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(filter) ? "" : "none";
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<div class="main-content">
+
+    <div class="top-header">
+        <div class="search-bar">
+            <span>🔍</span>
+            <input type="text" id="leadSearch" placeholder="Search students, leads...">
+        </div>
+        <div style="font-weight: bold;">Settings</div>
+    </div>
+
+    <div class="table-container">
+        <h2>Potential Leads</h2>
+        <table id="leadsTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Program</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Binod Rai</td>
+                    <td>binod@email.com</td>
+                    <td>B.E. Computer</td>
+                    <td><span class="status">Qualified</span></td>
+                </tr>
+                <tr>
+                    <td>Sarita Kc</td>
+                    <td>sarita@email.com</td>
+                    <td>BBA</td>
+                    <td><span class="status">Qualified</span></td>
+                </tr>
+                </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // We tell the computer to find the input box and the table rows
+    const searchInput = document.getElementById('leadSearch');
+    const tableRows = document.querySelectorAll('#leadsTable tbody tr');
+
+    // Every time you type a letter...
+    searchInput.addEventListener('keyup', function() {
+        const filter = searchInput.value.toLowerCase(); // Get what you typed
+
+        tableRows.forEach(row => {
+            // Get the text from the whole row
+            const rowText = row.textContent.toLowerCase();
+            
+            // If the row contains your search word, show it. Otherwise, hide it.
+            if (rowText.includes(filter)) {
+                row.style.display = ""; 
+            } else {
+                row.style.display = "none";
+            }
+        });
+    });
+</script>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>KU Lead Manager | Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo-area">
+            <h2 style="color: var(--gold); margin: 0;">Kathmandu</h2>
+            <p style="margin: 0; font-size: 0.7rem; letter-spacing: 2px;">UNIVERSITY</p>
+        </div>
+        <nav class="nav-links">
+            <a href="index.html" class="active">Dashboard</a>
+            <a href="leads.html">Leads</a>
+            <a href="applications.html">Applications</a>
+            <a href="exams.html">Exams</a>
+            <a href="finance.html">Finance</a>
+            <a href="#">Settings</a>
+        </nav>
+        <div class="user-profile">
+            <img src="https://ui-avatars.com/api/?name=Admin+User&background=random" alt="Admin">
+            <div class="user-info">
+                <p>Admin User</p>
+                <span>admin@ku.edu.np</span>
+            </div>
+        </div>
+    </div>
+
+    <main class="main-content" style="margin-left: 260px; padding: 40px; width: 100%;">
+        <div class="top-header">
+            <div class="search-bar">
+                <span>🔍</span>
+                <input type="text" placeholder="Search students, leads...">
+            </div>
+            <div style="font-weight: bold;">Settings</div>
+        </div>
+
+        <div class="welcome-card" style="background: linear-gradient(rgba(16,25,45,0.8), rgba(16,25,45,0.8)), url('assets/ku-building.jpg'); background-size: cover; color: white; padding: 40px; border-radius: 15px; margin-bottom: 30px;">
+            <h1>Welcome back, Administrator</h1>
+            <p>Admission season is active. You have 12 new applications to review and 5 scholarship requests pending decision.</p>
+            <div style="margin-top: 20px;">
+                <button class="btn-yellow">View Pending Tasks</button>
+                <button class="btn-outline">Generate Report</button>
+            </div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card"><p>Total Leads</p><h3>2,543</h3><span style="color:#48bb78;">↑ 12.5%</span></div>
+            <div class="metric-card"><p>Qualified</p><h3>1,234</h3><span style="color:#48bb78;">↑ 5.2%</span></div>
+            <div class="metric-card"><p>Enrolled</p><h3>456</h3><span style="color:#48bb78;">↑ 15.3%</span></div>
+            <div class="metric-card"><p>Revenue</p><h3>NPR 45M</h3><span style="color:#48bb78;">↑ 8.1%</span></div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 25px;">
+            <div class="funnel-container">
+                <h3>Admission Funnel</h3>
+                <p style="font-size: 0.8rem; color: #718096; margin-bottom: 20px;">Lead conversion rates across stages</p>
+                <div class="funnel-stage">
+                    <span class="funnel-label">Capture</span>
+                    <div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width: 90%;"></div></div>
+                </div>
+                <div class="funnel-stage">
+                    <span class="funnel-label">Qualification</span>
+                    <div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width: 70%;"></div></div>
+                </div>
+            </div>
+            <div class="funnel-container">
+                <h3>Lead Sources</h3>
+                <div style="height: 200px; display: flex; align-items: center; justify-content: center; background: #f8fafc; border-radius: 50%; width: 200px; margin: 0 auto; border: 20px solid var(--navy); border-left-color: var(--gold);">
+                    <strong>Charts</strong>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

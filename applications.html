@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Applications | KU Lead Manager</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo-area">
+            <h2 style="color: var(--gold); margin: 0;">Kathmandu</h2>
+            <p style="margin: 0; font-size: 0.7rem; letter-spacing: 2px;">UNIVERSITY</p>
+        </div>
+        <nav class="nav-links">
+            <a href="index.html">Dashboard</a>
+            <a href="leads.html">Leads</a>
+            <a href="applications.html" class="active">Applications</a>
+            <a href="exams.html">Exams</a>
+            <a href="finance.html">Finance</a>
+            <a href="#">Settings</a>
+        </nav>
+        
+        <div class="user-profile">
+            <img src="https://ui-avatars.com/api/?name=Admin+User&background=random" alt="Admin">
+            <div class="user-info">
+                <p>Admin User</p>
+                <span>admin@ku.edu.np</span>
+            </div>
+        </div>
+    </div>
+
+    <main class="main-content" style="margin-left: 260px; padding: 40px; width: calc(100% - 260px);">
+        
+        <div class="top-header">
+            <div class="search-bar">
+                <span>🔍</span>
+                <input type="text" id="appSearch" placeholder="Search applications, names, programs...">
+            </div>
+            <div style="font-weight: bold; cursor: pointer;">Settings</div>
+        </div>
+
+        <div class="table-container">
+            <h2>Submitted Applications</h2>
+            <p style="color: #64748b; margin-bottom: 20px;">Review and process student enrollment forms.</p>
+            
+            <table id="appTable">
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Program</th>
+                        <th>Application Date</th>
+                        <th>Fee Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Anish Magar</td>
+                        <td>B.E. Civil</td>
+                        <td>Jan 15, 2026</td>
+                        <td><span class="status" style="background: #d1fae5; color: #065f46;">Paid</span></td>
+                        <td><a href="#" style="color: #3b82f6;">Review</a></td>
+                    </tr>
+                    <tr>
+                        <td>Rohan Shrestha</td>
+                        <td>B.Sc. Physics</td>
+                        <td>Jan 18, 2026</td>
+                        <td><span class="status" style="background: #fee2e2; color: #991b1b;">Unpaid</span></td>
+                        <td><a href="#" style="color: #3b82f6;">Review</a></td>
+                    </tr>
+                    <tr>
+                        <td>Maya Devi</td>
+                        <td>B.Tech Biotech</td>
