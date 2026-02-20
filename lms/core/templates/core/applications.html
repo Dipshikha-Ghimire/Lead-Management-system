@@ -1,0 +1,45 @@
+{% extends 'core/base.html' %}
+{% block title %}Applications{% endblock %}
+
+{% block content %}
+<section class="page-head">
+	<h1>Applications</h1>
+	<p>Monitor submitted applications and decision progress.</p>
+</section>
+
+<div class="cards cards-3">
+	<article class="card metric-card">
+		<h3>Submitted</h3>
+		<p>1,082</p>
+		<small>+7.4% this week</small>
+	</article>
+	<article class="card metric-card">
+		<h3>Under Review</h3>
+		<p>326</p>
+		<small>52 high priority</small>
+	</article>
+	<article class="card metric-card">
+		<h3>Approved</h3>
+		<p>214</p>
+		<small>19 scholarships</small>
+	</article>
+</div>
+
+<article class="card">
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Applicant</th>
+				<th>Program</th>
+				<th>Status</th>
+				<th>Submitted</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td>Nima Lama</td><td>Computer Science</td><td>Under Review</td><td>2025-03-03</td></tr>
+			<tr><td>Sabin Karki</td><td>BBA</td><td>Pending Documents</td><td>2025-03-02</td></tr>
+			<tr><td>Anisha Rai</td><td>Architecture</td><td>Approved</td><td>2025-03-01</td></tr>
+		</tbody>
+	</table>
+</article>
+{% endblock %}

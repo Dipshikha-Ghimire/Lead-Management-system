@@ -1,0 +1,35 @@
+{% extends 'core/base.html' %}
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+<section class="page-head">
+	<h1>Settings</h1>
+	<p>Manage account details, alerts, and platform preferences.</p>
+</section>
+
+<div class="split-grid">
+	<article class="card">
+		<div class="section-head">
+			<h3>Profile</h3>
+			<span>Update your personal details</span>
+		</div>
+		<ul class="status-list">
+			<li><span>Full Name</span><strong>Admin User</strong></li>
+			<li><span>Email</span><strong>admin@ku.edu.np</strong></li>
+			<li><span>Role</span><strong>Administrator</strong></li>
+		</ul>
+	</article>
+
+	<article class="card">
+		<div class="section-head">
+			<h3>Preferences</h3>
+			<span>Notification and security controls</span>
+		</div>
+		<ul class="status-list">
+			<li><span>Email Alerts</span><strong>Enabled</strong></li>
+			<li><span>SMS Alerts</span><strong>Disabled</strong></li>
+			<li><span>Two-factor Authentication</span><strong>Enabled</strong></li>
+		</ul>
+	</article>
+</div>
+{% endblock %}

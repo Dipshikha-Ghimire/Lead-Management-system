@@ -1,0 +1,46 @@
+{% extends 'core/base.html' %}
+{% block title %}Finance{% endblock %}
+
+{% block content %}
+<section class="page-head">
+	<h1>Finance</h1>
+	<p>Revenue, fees, and scholarship disbursement tracking.</p>
+</section>
+
+<div class="cards cards-3">
+	<article class="card metric-card">
+		<h3>Total Revenue</h3>
+		<p>NPR 45M</p>
+		<small>+8.1% from last month</small>
+	</article>
+	<article class="card metric-card">
+		<h3>Pending Fees</h3>
+		<p>NPR 3.4M</p>
+		<small>82 accounts overdue</small>
+	</article>
+	<article class="card metric-card">
+		<h3>Scholarships</h3>
+		<p>NPR 6.2M</p>
+		<small>154 awards approved</small>
+	</article>
+</div>
+
+<article class="card">
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Student</th>
+				<th>Program</th>
+				<th>Type</th>
+				<th>Amount</th>
+				<th>Status</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td>Binita Sharma</td><td>BBA</td><td>Tuition Fee</td><td>NPR 120,000</td><td>Paid</td></tr>
+			<tr><td>Ritesh Tamang</td><td>Engineering</td><td>Scholarship</td><td>NPR 75,000</td><td>Approved</td></tr>
+			<tr><td>Manisha KC</td><td>Science</td><td>Lab Fee</td><td>NPR 18,000</td><td>Pending</td></tr>
+		</tbody>
+	</table>
+</article>
+{% endblock %}

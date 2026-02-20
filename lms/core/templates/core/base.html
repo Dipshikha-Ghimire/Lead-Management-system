@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}KU Lead Manager{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'core/css/main.css' %}">
+</head>
+<body>
+
+<div class="app">
+
+    <aside class="sidebar">
+        <div class="brand">
+            <span class="brand-icon">🎓</span>
+            <span>Kathmandu<br><small>UNIVERSITY</small></span>
+        </div>
+
+        <nav>
+            <a href="{% url 'dashboard' %}" class="{% if request.path == '/dashboard/' %}active{% endif %}">
+                📊 Dashboard
+            </a>
+            <a href="{% url 'leads' %}" class="{% if request.path == '/leads/' %}active{% endif %}">👥 Leads</a>
+            <a href="{% url 'applications' %}" class="{% if request.path == '/applications/' %}active{% endif %}">📄 Applications</a>
+            <a href="{% url 'exams' %}" class="{% if request.path == '/exams/' %}active{% endif %}">📝 Exams</a>
+            <a href="{% url 'finance' %}" class="{% if request.path == '/finance/' %}active{% endif %}">💰 Finance</a>
+            <a href="{% url 'settings' %}" class="{% if request.path == '/settings/' %}active{% endif %}">⚙️ Settings</a>
+        </nav>
+
+        <div class="user-box">
+            <strong>{{ request.user.username|default:'Admin User' }}</strong>
+            <small>admin@ku.edu.np</small>
+        </div>
+    </aside>
+
+    <main class="main">
+
+        <header class="topbar">
+            <input type="text" placeholder="Search students, leads, or applications">
+            <div class="top-actions">
+                <span>🔔</span>
+                <span>View notifications</span>
+                <a href="{% url 'settings' %}">Open user menu</a>
+            </div>
+        </header>
+
+        <section class="page">
+            {% block content %}{% endblock %}
+        </section>
+
+    </main>
+
+</div>
+
+</body>
+</html>

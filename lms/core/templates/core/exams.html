@@ -1,0 +1,45 @@
+{% extends 'core/base.html' %}
+{% block title %}Exams{% endblock %}
+
+{% block content %}
+<section class="page-head">
+	<h1>Exams</h1>
+	<p>Entrance exam sessions, attendance, and results summary.</p>
+</section>
+
+<div class="cards cards-3">
+	<article class="card metric-card">
+		<h3>Upcoming Sessions</h3>
+		<p>8</p>
+		<small>Next exam in 3 days</small>
+	</article>
+	<article class="card metric-card">
+		<h3>Registered Students</h3>
+		<p>742</p>
+		<small>+9.8% from last cycle</small>
+	</article>
+	<article class="card metric-card">
+		<h3>Pass Rate</h3>
+		<p>61%</p>
+		<small>Preliminary score band</small>
+	</article>
+</div>
+
+<article class="card">
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Exam</th>
+				<th>Date</th>
+				<th>Venue</th>
+				<th>Registered</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td>Engineering Entrance</td><td>2025-03-06</td><td>KU Main Hall</td><td>210</td></tr>
+			<tr><td>BBA Aptitude Test</td><td>2025-03-08</td><td>Block C</td><td>165</td></tr>
+			<tr><td>Science Assessment</td><td>2025-03-10</td><td>Block A</td><td>192</td></tr>
+		</tbody>
+	</table>
+</article>
+{% endblock %}
