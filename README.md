@@ -1,77 +1,158 @@
-# Lead-Management-system
-lead management system
-# Project: lms (Django)
+# LMS Lead Management System
 
-Overview
---------
+Web-based lead and admission workflow system built with Django.
 
-This repository contains a small Django project named "lms" (Learning Management System) using SQLite for local development. It includes a single app, `core`, basic models and views, and the standard Django project layout (`manage.py`, `lms/`, `core/`).
+## Overview
 
-Quick start (Windows)
-----------------------
+This project manages the admission lifecycle for an educational institution, including:
 
-- Create and activate a virtual environment:
+- Department and program setup
+- Lead capture and counselor assignment
+- Follow-up tracking
+- Application and entrance exam flow
+- Scholarship decisions
+- Payment tracking
+- User authentication (login/signup/logout)
+- Password reset flow
+
+The main app is `core`, mounted in the `lms` Django project.
+
+## Tech Stack
+
+- Python
+- Django 6.0
+- MySQL (configured in `lms/lms/settings.py`)
+- HTML/CSS/JavaScript templates and static assets
+
+## Current Database Configuration
+
+`lms/lms/settings.py` is currently configured for MySQL:
+
+- Database name: `lead_management_system`
+- User: `root`
+- Password: `lead`
+- Host: `localhost`
+- Port: `3306`
+
+Update these values before running if your local setup is different.
+
+## Project Structure
+
+```text
+README.md
+lms/
+	manage.py
+	core/
+		models.py
+		views.py
+		forms.py
+		urls.py
+		admin.py
+		templates/core/
+		static/core/
+		migrations/
+	lms/
+		settings.py
+		urls.py
+```
+
+## Core Modules
+
+Implemented models in `lms/core/models.py`:
+
+- `Department`
+- `Program`
+- `Staff`
+- `Lead`
+- `FollowUp`
+- `Application`
+- `EntranceExam`
+- `Scholarship`
+- `Payment`
+
+These are registered in Django admin (`lms/core/admin.py`) with custom list/search/filter support for leads.
+
+## URL Endpoints
+
+Defined in `lms/core/urls.py`:
+
+- `/` -> homepage
+- `/login/`
+- `/signup/`
+- `/logout/`
+- `/password-reset/`
+- `/password-reset/done/`
+- `/password-reset-confirm/<uidb64>/<token>/`
+- `/password-reset-complete/`
+- `/dashboard/`
+- `/leads/`
+- `/applications/`
+- `/exams/`
+- `/finance/`
+- `/settings/`
+- `/admin/` (from project urls)
+
+## Local Setup (Windows)
+
+1. Go to the Django project folder (where `manage.py` exists):
+
+```powershell
+cd lms
+```
+
+2. Create and activate a virtual environment:
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1   # or use activate.bat for cmd
+.\.venv\Scripts\Activate.ps1
 ```
 
-- Install dependencies (if you have a `requirements.txt`) or install Django directly:
+3. Install dependencies:
 
 ```powershell
-pip install -r requirements.txt
-# or
-pip install Django
+pip install Django mysqlclient
 ```
 
-- Apply migrations and create a superuser:
+4. Apply migrations:
 
 ```powershell
 python manage.py migrate
+```
+
+5. Create an admin user:
+
+```powershell
 python manage.py createsuperuser
 ```
 
-- Run the development server:
+6. Run the development server:
 
 ```powershell
 python manage.py runserver
 ```
 
-Access the site at `http://127.0.0.1:8000/` and the admin at `http://127.0.0.1:8000/admin/`.
+Open:
 
-Running tests
--------------
+- App: `http://127.0.0.1:8000/`
+- Admin: `http://127.0.0.1:8000/admin/`
 
-Run the Django test suite with:
+## Password Reset Email Behavior
+
+This project uses Django console email backend:
+
+- `EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'`
+
+Password reset emails are printed in terminal during development.
+
+## Running Tests
+
+From `lms/`:
 
 ```powershell
 python manage.py test
 ```
 
-Project structure
------------------
+## Notes
 
-- `manage.py`: Django management script.
-- `db.sqlite3`: SQLite database used for development.
-- `lms/`: Django project configuration (settings, urls, wsgi, asgi).
-- `core/`: Main app for the project (models, views, admin, migrations).
-
-Notes
------
-
-- This project uses SQLite by default. For production use, switch to PostgreSQL or another production-ready DB and update `lms/settings.py`.
-- If there is no `requirements.txt`, create one with `pip freeze > requirements.txt` after installing required packages.
-- To inspect the models and admin configuration, see the `core` app files: `core/models.py` and `core/admin.py`.
-
-Next steps
-----------
-
-- Run the migrations and start the server locally.
-- Create initial data or a fixtures file if needed.
-- Consider adding a `requirements.txt`, Dockerfile, and CI configuration for reproducible builds.
-
-License
--------
-
-Add a license file if this project is intended for public distribution.
+- `db.sqlite3` exists in the repository, but active settings point to MySQL.
+- For production, use environment variables for secrets and database credentials.
