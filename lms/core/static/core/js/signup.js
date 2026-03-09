@@ -1,83 +1,58 @@
-document.getElementById('signupForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+window.addEventListener('DOMContentLoaded', () => {
+    const signupForm = document.getElementById('signupForm');
+    const usernameInput = document.getElementById('username');
+    const emailInput = document.getElementById('email');
+    const password1Input = document.getElementById('password1');
+    const password2Input = document.getElementById('password2');
 
-    const fullname = document.getElementById('fullname').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-
-    // Validation
-    if (!fullname) {
-        showError('Please enter your full name');
+    if (!signupForm || !usernameInput || !emailInput || !password1Input || !password2Input) {
         return;
     }
 
-    if (!email) {
-        showError('Please enter your email');
-        return;
-    }
+    signupForm.addEventListener('submit', (event) => {
+        clearClientError();
 
-    if (!isValidEmail(email)) {
-        showError('Please enter a valid email address');
-        return;
-    }
+        const username = usernameInput.value.trim();
+        const email = emailInput.value.trim();
+        const password1 = password1Input.value;
+        const password2 = password2Input.value;
 
-    if (password.length < 6) {
-        showError('Password must be at least 6 characters long');
-        return;
-    }
+        if (!username) {
+            event.preventDefault();
+            showClientError('Please enter your username.');
+            return;
+        }
 
-    if (password !== confirmPassword) {
-        showError('Passwords do not match');
-        return;
-    }
+        if (!email) {
+            event.preventDefault();
+            showClientError('Please enter your email address.');
+            return;
+        }
 
-    // Success
-    showSuccess(`Welcome ${fullname}! Your account has been created successfully.`);
-    
-    // Reset form
-    document.getElementById('signupForm').reset();
+        if (password1.length < 8) {
+            event.preventDefault();
+            showClientError('Password must be at least 8 characters long.');
+            return;
+        }
 
-    // Redirect after 2 seconds
-    setTimeout(() => {
-        window.location.href = 'login.html';
-    }, 2000);
+        if (password1 !== password2) {
+            event.preventDefault();
+            showClientError('Passwords do not match.');
+        }
+    });
 });
 
-function isValidEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+function showClientError(message) {
+    const form = document.getElementById('signupForm');
+    const errorBlock = document.createElement('div');
+    errorBlock.className = 'field-errors client-error';
+    errorBlock.innerHTML = `<small class="error-text">${message}</small>`;
+    form.insertBefore(errorBlock, form.querySelector('.btn-submit'));
 }
 
-function showError(message) {
-    const formBox = document.querySelector('.form-box');
-    removeMessage();
-    
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'message error';
-    messageDiv.textContent = message;
-    
-    formBox.insertBefore(messageDiv, formBox.firstChild);
-
-    setTimeout(() => {
-        messageDiv.remove();
-    }, 4000);
-}
-
-function showSuccess(message) {
-    const formBox = document.querySelector('.form-box');
-    removeMessage();
-    
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'message success';
-    messageDiv.textContent = message;
-    
-    formBox.insertBefore(messageDiv, formBox.firstChild);
-}
-
-function removeMessage() {
-    const existingMessage = document.querySelector('.message');
-    if (existingMessage) {
-        existingMessage.remove();
+function clearClientError() {
+    const existing = document.querySelector('.client-error');
+    if (existing) {
+        existing.remove();
     }
 }

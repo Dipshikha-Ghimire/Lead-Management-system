@@ -1,45 +1,165 @@
 {% extends 'core/base.html' %}
+{% load static %}
 {% block title %}Applications{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/applications.css' %}">
+{% endblock %}
+
 {% block content %}
-<section class="page-head">
-	<h1>Applications</h1>
-	<p>Monitor submitted applications and decision progress.</p>
+<input type="hidden" id="csrfToken" value="{{ csrf_token }}">
+<section class="page-head applications-head">
+    <div>
+        <h1>Applications</h1>
+        <p>Monitor submitted applications and decision progress.</p>
+    </div>
+    <button type="button" class="btn-primary" id="addApplicationBtn">Add Application</button>
 </section>
 
+<article class="card applications-filter-card">
+    <form method="get" action="" class="applications-filter-form">
+        <input type="text" name="q" value="{{ query }}" placeholder="Search applicant, email, program, status" class="input-text">
+        <select name="status" class="select-input">
+            <option value="" {% if not status_filter %}selected{% endif %}>All Statuses</option>
+            {% for key, label in status_choices %}
+            <option value="{{ key }}" {% if status_filter == key %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn-primary">Filter</button>
+    </form>
+</article>
+
 <div class="cards cards-3">
-	<article class="card metric-card">
-		<h3>Submitted</h3>
-		<p>1,082</p>
-		<small>+7.4% this week</small>
-	</article>
-	<article class="card metric-card">
-		<h3>Under Review</h3>
-		<p>326</p>
-		<small>52 high priority</small>
-	</article>
-	<article class="card metric-card">
-		<h3>Approved</h3>
-		<p>214</p>
-		<small>19 scholarships</small>
-	</article>
+    <article class="card metric-card">
+        <h3>Submitted</h3>
+        <p id="totalSubmittedMetric">{{ total_submitted }}</p>
+        <small>Total applications in database</small>
+    </article>
+    <article class="card metric-card">
+        <h3>Reviewed</h3>
+        <p id="reviewedMetric">{{ reviewed_count }}</p>
+        <small>Status: Reviewed</small>
+    </article>
+    <article class="card metric-card">
+        <h3>Accepted</h3>
+        <p id="acceptedMetric">{{ accepted_count }}</p>
+        <small>Status: Accepted</small>
+    </article>
 </div>
 
 <article class="card">
-	<table class="table">
-		<thead>
-			<tr>
-				<th>Applicant</th>
-				<th>Program</th>
-				<th>Status</th>
-				<th>Submitted</th>
-			</tr>
-		</thead>
-		<tbody>
-			<tr><td>Nima Lama</td><td>Computer Science</td><td>Under Review</td><td>2025-03-03</td></tr>
-			<tr><td>Sabin Karki</td><td>BBA</td><td>Pending Documents</td><td>2025-03-02</td></tr>
-			<tr><td>Anisha Rai</td><td>Architecture</td><td>Approved</td><td>2025-03-01</td></tr>
-		</tbody>
-	</table>
+    <table class="table applications-table" id="applicationsTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Applicant</th>
+                <th>Program</th>
+                <th>Status</th>
+                <th>Submitted</th>
+                <th class="col-actions">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="applicationsTableBody">
+            {% for application in application_rows %}
+            <tr data-app-id="{{ application.id }}">
+                <td class="app-id">A{{ application.id|stringformat:"04d" }}</td>
+                <td>
+                    <div class="applicant-name">{{ application.applicant }}</div>
+                    <small class="applicant-email">{{ application.email }}</small>
+                </td>
+                <td class="program-name">{{ application.program }}</td>
+                <td>
+                    <span class="status-badge status-{{ application.status_key }}">{{ application.status }}</span>
+                </td>
+                <td class="submitted-date">{{ application.submitted|date:"Y-m-d" }}</td>
+                <td class="col-actions">
+                    <div class="action-btns workflow-btns">
+                        <button type="button" class="action-btn review-btn app-action-btn" data-action="review" title="Mark reviewed and set lead qualified" data-id="{{ application.id }}">Review</button>
+                        <button type="button" class="action-btn accept-btn app-action-btn" data-action="accept" title="Accept and set lead converted" data-id="{{ application.id }}">Accept</button>
+                        <button type="button" class="action-btn reject-btn app-action-btn" data-action="reject" title="Reject and set lead dropped" data-id="{{ application.id }}">Reject</button>
+                    </div>
+                    <div class="action-btns">
+                        <button type="button" class="action-btn app-view-btn" title="View" data-id="{{ application.id }}">View</button>
+                        <button type="button" class="action-btn app-edit-btn" title="Edit" data-id="{{ application.id }}">Edit</button>
+                        <button type="button" class="action-btn delete-btn app-delete-btn" title="Delete" data-id="{{ application.id }}">Delete</button>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr id="emptyApplicationsRow">
+                <td colspan="6" class="empty-row">No applications found in database.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </article>
+
+<div class="app-modal" id="applicationModal" aria-hidden="true">
+    <div class="app-modal-backdrop" data-close="true"></div>
+    <div class="app-modal-card">
+        <div class="app-modal-head">
+            <h3 id="applicationModalTitle">Application</h3>
+            <button type="button" class="action-btn" id="applicationModalClose" title="Close">x</button>
+        </div>
+        <form id="applicationForm" class="app-modal-form">
+            <input type="hidden" id="applicationId">
+            <div class="app-modal-grid">
+                <label>
+                    Lead
+                    <select id="applicationLead" required>
+                        <option value="">Select lead</option>
+                        {% for lead in lead_choices %}
+                        <option value="{{ lead.lead_id }}">{{ lead.first_name }} {{ lead.last_name }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>
+                    Program
+                    <select id="applicationProgram" required>
+                        <option value="">Select program</option>
+                        {% for program in program_choices %}
+                        <option value="{{ program.prog_id }}">{{ program.name }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>
+                    Lead First Name
+                    <input type="text" id="applicationLeadFirstName" required>
+                </label>
+                <label>
+                    Lead Last Name
+                    <input type="text" id="applicationLeadLastName" required>
+                </label>
+                <label>
+                    Lead Email
+                    <input type="email" id="applicationLeadEmail" placeholder="student@email.com">
+                </label>
+                <label>
+                    Lead Program Interest
+                    <input type="text" id="applicationLeadProgramInterest" placeholder="Program selected in Add Lead">
+                </label>
+                <label>
+                    Status
+                    <select id="applicationStatus" required>
+                        {% for key, label in status_choices %}
+                        <option value="{{ key }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>
+                    Documents URL
+                    <input type="url" id="applicationDocumentsUrl" placeholder="https://example.com/docs">
+                </label>
+            </div>
+            <div class="app-modal-actions">
+                <button type="button" class="btn-primary" id="applicationModalEditBtn">Edit</button>
+                <button type="submit" class="btn-primary" id="applicationModalSaveBtn" hidden>Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'core/js/applications.js' %}"></script>
 {% endblock %}

@@ -30,6 +30,10 @@
 			<li><span>SMS Alerts</span><strong>Disabled</strong></li>
 			<li><span>Two-factor Authentication</span><strong>Enabled</strong></li>
 		</ul>
+		<form method="post" action="{% url 'logout' %}" class="settings-logout-form">
+			{% csrf_token %}
+			<button class="btn-logout" type="submit">Logout</button>
+		</form>
 	</article>
 </div>
 {% endblock %}

@@ -1,0 +1,257 @@
+.applications-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.applications-filter-card {
+    margin-bottom: 16px;
+}
+
+.applications-filter-form {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.input-text,
+.select-input {
+    min-width: 220px;
+    padding: 9px 12px;
+    border: 1px solid #d5deef;
+    border-radius: 10px;
+}
+
+.applications-table .col-actions {
+    text-align: right;
+}
+
+.action-btns {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.workflow-btns {
+    margin-bottom: 6px;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 52px;
+    height: 32px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #fff;
+    color: #475569;
+    cursor: pointer;
+    padding: 0 10px;
+    transition: all .15s;
+}
+
+.action-btn:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #0f172a;
+}
+
+.delete-btn {
+    color: #b91c1c;
+}
+
+.delete-btn:hover {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #991b1b;
+}
+
+.review-btn {
+    color: #4338ca;
+}
+
+.review-btn:hover {
+    background: #eef2ff;
+    border-color: #c7d2fe;
+    color: #3730a3;
+}
+
+.accept-btn {
+    color: #166534;
+}
+
+.accept-btn:hover {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #14532d;
+}
+
+.reject-btn {
+    color: #9f1239;
+}
+
+.reject-btn:hover {
+    background: #fff1f2;
+    border-color: #fecdd3;
+    color: #881337;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-pending {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.status-reviewed {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.status-accepted {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.status-rejected,
+.status-dropped {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.status-qualified {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.status-converted {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.empty-row {
+    text-align: center;
+    color: #94a3b8;
+    padding: 26px !important;
+}
+
+.app-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    z-index: 1000;
+}
+
+.app-modal.open {
+    display: block;
+}
+
+.app-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.app-modal-card {
+    position: relative;
+    width: min(700px, calc(100vw - 24px));
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid #dbe4f2;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.2);
+    overflow: hidden;
+}
+
+.app-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid #e5eaf6;
+}
+
+.app-modal-head h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.app-modal-form {
+    padding: 16px 18px 18px;
+}
+
+.app-modal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.app-modal-grid label:nth-child(9) {
+    grid-column: span 2;
+}
+
+.app-modal-grid label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+    color: #475569;
+}
+
+.app-modal-grid input,
+.app-modal-grid select {
+    border: 1px solid #d5deef;
+    border-radius: 10px;
+    padding: 9px 10px;
+    font-size: 14px;
+}
+
+.app-modal-grid input:disabled,
+.app-modal-grid select:disabled {
+    background: #f8fafc;
+    color: #64748b;
+}
+
+.app-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 14px;
+}
+
+.app-modal-actions .btn-primary {
+    border: none;
+    background: #0f766e;
+    color: #fff;
+    border-radius: 9px;
+    padding: 8px 14px;
+    cursor: pointer;
+}
+
+@media (max-width: 680px) {
+    .applications-head {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .app-modal-card {
+        margin: 14px auto;
+    }
+
+    .app-modal-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .app-modal-grid label:nth-child(9) {
+        grid-column: span 1;
+    }
+}

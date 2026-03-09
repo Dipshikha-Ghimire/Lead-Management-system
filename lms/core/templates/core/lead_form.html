@@ -1,0 +1,315 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>University Lead Management System</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="{% static 'core/css/lead_form.css' %}" />
+</head>
+
+<body>
+    <input type="hidden" id="csrfToken" value="{{ csrf_token }}" />
+
+    <div class="page-wrapper">
+        <form action="{% url 'leads' %}" method="get">
+            <button type="submit" class="back-to-leads-btn">← Back to Leads</button>
+        </form>
+
+        <!-- Header -->
+        <div class="header">
+            <div class="header-badge">Kathmandu University</div>
+            <h1>Prospect <span>Enrollment</span> Portal</h1>
+            <p>Capture and track prospective student information across all programs</p>
+        </div>
+
+        <!-- Steps Nav -->
+        <div class="steps-nav" id="stepsNav">
+            <div class="step-item active" data-step="1">
+                <div class="step-num"><span>1</span></div>
+                <div class="step-label">Personal</div>
+            </div>
+            <div class="step-item" data-step="2">
+                <div class="step-num"><span>2</span></div>
+                <div class="step-label">Academic</div>
+            </div>
+            <div class="step-item" data-step="3">
+                <div class="step-num"><span>3</span></div>
+                <div class="step-label">Inquiry</div>
+            </div>
+            <div class="step-item" data-step="4">
+                <div class="step-num"><span>4</span></div>
+                <div class="step-label">Review</div>
+            </div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="form-card" id="formCard">
+
+            <!-- STEP 1: Personal Info -->
+            <div class="form-step active" id="step1">
+                <div class="section-header">
+                    <div class="section-icon">👤</div>
+                    <div>
+                        <div class="section-title">Personal Information</div>
+                        <div class="section-subtitle">Basic contact details of the prospective student</div>
+                    </div>
+                </div>
+                <div class="form-body">
+                    <div class="form-grid">
+                        <div class="field">
+                            <label>First Name <span class="req">*</span></label>
+                            <input type="text" id="firstName" placeholder="e.g. Aarav" />
+                            <span class="error-msg" id="firstNameErr">Please enter first name</span>
+                        </div>
+                        <div class="field">
+                            <label>Last Name <span class="req">*</span></label>
+                            <input type="text" id="lastName" placeholder="e.g. Sharma" />
+                            <span class="error-msg" id="lastNameErr">Please enter last name</span>
+                        </div>
+                        <div class="field">
+                            <label>Email Address <span class="req">*</span></label>
+                            <input type="email" id="email" placeholder="student@email.com" />
+                            <span class="error-msg" id="emailErr">Please enter a valid email</span>
+                        </div>
+                        <div class="field">
+                            <label>Phone Number <span class="req">*</span></label>
+                            <input type="tel" id="phone" placeholder="+977-98XXXXXXXX" />
+                            <span class="error-msg" id="phoneErr">Please enter phone number</span>
+                        </div>
+                        <div class="field">
+                            <label>Date of Birth</label>
+                            <input type="date" id="dob" />
+                        </div>
+                        <div class="field">
+                            <label>Gender</label>
+                            <select id="gender">
+                                <option value="">Select gender</option>
+                                <option>Male</option>
+                                <option>Female</option>
+                                <option>Prefer not to say</option>
+                            </select>
+                        </div>
+                        <div class="field full">
+                            <label>Home Address / City</label>
+                            <input type="text" id="address" placeholder="City, State / Province, Country" />
+                        </div>
+                        <div class="field">
+                            <label>Nationality</label>
+                            <input type="text" id="nationality" placeholder="e.g. Nepali" />
+                        </div>
+                        <div class="field">
+                            <label>WhatsApp / Alternate Contact</label>
+                            <input type="tel" id="altContact" placeholder="+977-98XXXXXXXX" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2: Academic Info -->
+            <div class="form-step" id="step2">
+                <div class="section-header">
+                    <div class="section-icon">🎓</div>
+                    <div>
+                        <div class="section-title">Academic Background</div>
+                        <div class="section-subtitle">Education history and program preferences</div>
+                    </div>
+                </div>
+                <div class="form-body">
+                    <div class="form-grid">
+                        <div class="field full">
+                            <label>Program of Interest <span class="req">*</span></label>
+                            <select id="program">
+                                <option value="">Select a program</option>
+                                <optgroup label="Undergraduate">
+                                    <option>B.Sc. Computer Science</option>
+                                    <option>B.Sc. Information Technology</option>
+                                    <option>BBA – Business Administration</option>
+                                    <option>B.Eng. Civil Engineering</option>
+                                    <option>B.Sc. Architecture</option>
+                                    <option>BA Psychology</option>
+                                </optgroup>
+                                <optgroup label="Postgraduate">
+                                    <option>MBA – General Management</option>
+                                    <option>MBA – Finance & Banking</option>
+                                    <option>M.Sc. Data Science</option>
+                                    <option>M.Sc. Artificial Intelligence</option>
+                                    <option>LLM – Law</option>
+                                </optgroup>
+                                <optgroup label="Short Courses">
+                                    <option>AI In Education</option>
+                                    <option>Educational Psychology</option>
+                                </optgroup>
+                            </select>
+                            <span class="error-msg" id="programErr">Please select a program</span>
+                        </div>
+                        <div class="field">
+                            <label>Desired Intake Year <span class="req">*</span></label>
+                            <select id="intakeYear">
+                                <option value="">Select year</option>
+                                <option>2025</option>
+                                <option>2026</option>
+                                <option>2027</option>
+                            </select>
+                            <span class="error-msg" id="intakeYearErr">Please select intake year</span>
+                        </div>
+                        <div class="field">
+                            <label>Intake Semester</label>
+                            <select id="intakeSem">
+                                <option value="">Select semester</option>
+                                <option>Spring (Jan–May)</option>
+                                <option>Fall (Aug–Dec)</option>
+                                <option>Summer (May–Aug)</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Highest Education Level</label>
+                            <select id="eduLevel">
+                                <option value="">Select level</option>
+                                <option>High School (+2 / A-Level)</option>
+                                <option>Bachelor's Degree</option>
+                                <option>Master's Degree</option>
+                                <option>Diploma / Certificate</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>GPA / Percentage</label>
+                            <input type="text" id="gpa" placeholder="e.g. 3.8 / 4.0 or 78%" />
+                        </div>
+                        <div class="field full">
+                            <label>Previous Institution Name</label>
+                            <input type="text" id="institution" placeholder="Name of last attended school or college" />
+                        </div>
+                        <div class="field full">
+                            <label>Scholarship / Financial Aid Interest</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="scholarship" value="Yes" /> Yes, interested</label>
+                                <label><input type="radio" name="scholarship" value="No" /> No, self-funded</label>
+                                <label><input type="radio" name="scholarship" value="Unsure" /> Not sure yet</label>
+                            </div>
+                        </div>
+                        <div class="field full">
+                            <label>Preferred Mode of Study</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="mode" value="On-campus" /> 🏛 On-Campus</label>
+                                <label><input type="radio" name="mode" value="Online" /> 💻 Online</label>
+                                <label><input type="radio" name="mode" value="Hybrid" /> 🔀 Hybrid</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3: Inquiry Details -->
+            <div class="form-step" id="step3">
+                <div class="section-header">
+                    <div class="section-icon">📋</div>
+                    <div>
+                        <div class="section-title">Inquiry & Lead Details</div>
+                        <div class="section-subtitle">Source tracking and lead qualification</div>
+                    </div>
+                </div>
+                <div class="form-body">
+                    <div class="form-grid">
+                        <div class="field full">
+                            <label>How did you hear about us? <span class="req">*</span></label>
+                            <div class="source-tags" id="sourceTags">
+                                <button type="button" class="tag-btn" data-val="Social Media">📱 Social Media</button>
+                                <button type="button" class="tag-btn" data-val="Google Search">🔍 Google Search</button>
+                                <button type="button" class="tag-btn" data-val="Referral">🤝 Referral</button>
+                                <button type="button" class="tag-btn" data-val="Education Fair">🎪 Education
+                                    Fair</button>
+                                <button type="button" class="tag-btn" data-val="Walk-In">🚶 Walk-In</button>
+                                <button type="button" class="tag-btn" data-val="Advertisement">📺 Advertisement</button>
+                                <button type="button" class="tag-btn" data-val="Website">🌐 Website</button>
+                                <button type="button" class="tag-btn" data-val="Alumni">🎓 Alumni</button>
+                            </div>
+                            <input type="hidden" id="leadSource" />
+                            <span class="error-msg" id="leadSourceErr">Please select a source</span>
+                        </div>
+
+                        <div class="field full">
+                            <div class="divider"></div>
+                        </div>
+
+                        <div class="field full">
+                            <label>Lead Status</label>
+                            <select id="leadStatus" name="lead_status">
+                                {% for key, label in status_choices %}
+                                <option value="{{ key }}" {% if key == 'new' %}selected{% endif %}>{{ label }}</option>
+                                {% empty %}
+                                <option value="new" selected>New</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label>Assigned Counselor</label>
+                            <select id="counselor">
+                                <option disabled selected value="">Select Counselor</option>
+                                <option>Priya Tamang</option>
+                                <option>Rajesh Adhikari</option>
+                                <option>Sushila Rai</option>
+                                <option>Deepak Thapa</option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label>Follow-up Date</label>
+                            <input type="date" id="followupDate" />
+                        </div>
+
+                        <div class="field full">
+                            <label>Additional Notes / Comments</label>
+                            <textarea id="notes"
+                                placeholder="Any special requirements, questions asked, or counselor observations..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 4: Review -->
+            <div class="form-step" id="step4">
+                <div class="section-header">
+                    <div class="section-icon">✅</div>
+                    <div>
+                        <div class="section-title">Review & Submit</div>
+                        <div class="section-subtitle">Verify the details before creating the lead record</div>
+                    </div>
+                </div>
+                <div class="form-body">
+                    <div class="review-grid" id="reviewGrid">
+                        <!-- populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success -->
+            <div class="success-screen" id="successScreen">
+                <div class="success-icon">✓</div>
+                <h2>Lead Captured Successfully</h2>
+                <p>The prospect's record has been created and assigned to the counselor's queue.</p>
+                <p id="successName" class="success-name"></p>
+                <div class="lead-id-badge" id="leadIdBadge">Lead ID: —</div>
+                <br />
+                <button class="btn btn-primary btn-reset" id="btnReset">➕ Add New Lead</button>
+            </div>
+
+            <!-- Footer -->
+            <div class="form-footer" id="formFooter">
+                <button class="btn btn-ghost btn-back-hidden" id="btnBack">← Back</button>
+                <span class="step-counter" id="stepCounter">Step 1 of 4</span>
+                <button class="btn btn-primary" id="btnNext">Continue →</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="{% static 'core/js/lead_form.js' %}"></script>
+</body>
+
+</html>

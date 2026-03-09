@@ -1,135 +1,4 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Inter, sans-serif;
-}
-
-body {
-    background: #f3f6fb;
-    color: #0f172a;
-}
-
-.app {
-    display: flex;
-    min-height: 100vh;
-}
-
-.sidebar {
-    width: 260px;
-    background: linear-gradient(180deg, #0b1b39 0%, #112a57 100%);
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 22px 16px;
-    position: sticky;
-    top: 0;
-    height: 100vh;
-}
-
-.brand {
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 28px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    line-height: 1.2;
-}
-
-.brand small {
-    letter-spacing: .12em;
-    opacity: .85;
-}
-
-.brand-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, .12);
-}
-
-.sidebar nav a {
-    display: block;
-    padding: 11px 12px;
-    margin-bottom: 8px;
-    border-radius: 10px;
-    color: #d5dcf5;
-    text-decoration: none;
-    transition: all .2s ease;
-}
-
-.sidebar nav a.active,
-.sidebar nav a:hover {
-    background: rgba(59, 130, 246, .42);
-    color: #fff;
-}
-
-.user-box {
-    background: rgba(8, 20, 44, .85);
-    padding: 12px 14px;
-    border-radius: 10px;
-    font-size: 14px;
-    border: 1px solid rgba(255, 255, 255, .08);
-}
-
-.user-box small {
-    color: #b6c6ee;
-}
-
-.main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-
-.topbar {
-    min-height: 66px;
-    background: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 24px;
-    border-bottom: 1px solid #e5e9f4;
-}
-
-.topbar input {
-    width: min(520px, 100%);
-    padding: 10px 14px;
-    border-radius: 12px;
-    border: 1px solid #d5deef;
-    background: #f8faff;
-}
-
-.topbar input:focus {
-    outline: none;
-    border-color: #93c5fd;
-}
-
-.top-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #334155;
-    font-size: 14px;
-}
-
-.top-actions a {
-    text-decoration: none;
-    color: #1d4ed8;
-    font-weight: 600;
-}
-
-.page {
-    padding: 22px;
-    display: grid;
-    gap: 18px;
-}
+/* Base styles moved to base.css */
 
 .cards {
     display: grid;
@@ -182,12 +51,18 @@ body {
     gap: 10px;
 }
 
+.inline-form {
+    display: inline-flex;
+}
+
 .btn-primary,
-.btn-secondary {
+.btn-secondary,
+.btn-logout {
     border: 0;
     border-radius: 10px;
     padding: 10px 14px;
     font-weight: 600;
+    cursor: pointer;
 }
 
 .btn-primary {
@@ -198,6 +73,19 @@ body {
 .btn-secondary {
     background: rgba(255, 255, 255, .2);
     color: #fff;
+}
+
+.btn-logout {
+    background: #dc2626;
+    color: #fff;
+}
+
+.btn-logout:hover {
+    background: #b91c1c;
+}
+
+.settings-logout-form {
+    margin-top: 16px;
 }
 
 .metric-card p {
@@ -304,6 +192,25 @@ body {
     color: #64748b;
 }
 
+.page-head .section-head {
+    align-items: center;
+}
+
+.add-lead-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    background: #1d4ed8;
+    color: #fff;
+    border: 1px solid #1e40af;
+    min-height: 40px;
+}
+
+.add-lead-btn:hover {
+    background: #1e40af;
+}
+
 @media (max-width: 1200px) {
     .cards {
         grid-template-columns: repeat(2, 1fr);
@@ -315,28 +222,17 @@ body {
 }
 
 @media (max-width: 860px) {
-    .app {
-        flex-direction: column;
-    }
-
-    .sidebar {
-        width: 100%;
-        height: auto;
-        position: static;
-    }
-
-    .topbar {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-
-    .topbar input {
-        width: 100%;
-    }
 
     .cards,
     .cards-3 {
         grid-template-columns: 1fr;
     }
+
+    .page-head .section-head {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
 }
+
+/* Leads styles moved to leads.css */

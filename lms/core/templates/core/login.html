@@ -19,6 +19,7 @@
 
       <form method="post" id="loginForm">
         {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next|default:'' }}">
 
         {% if messages %}
         <div class="messages">
@@ -78,8 +79,7 @@
       </p>
     </div>
   </div>
+  <script src="{% static 'core/js/login.js' %}"></script>
 </body>
-
-<script src="{% static 'core/js/login.js' %}"></script>
 
 </html>

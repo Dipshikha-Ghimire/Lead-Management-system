@@ -63,9 +63,16 @@ class Staff(models.Model):
 
 class Lead(models.Model):
     SOURCE_CHOICES = [
+        ('social_media', 'Social Media'),
+        ('google_search', 'Google Search'),
+        ('referral', 'Referral'),
+        ('education_fair', 'Education Fair'),
+        ('walk_in', 'Walk-In'),
+        ('advertisement', 'Advertisement'),
+        ('website', 'Website'),
+        ('alumni', 'Alumni'),
         ('facebook', 'Facebook'),
         ('walkin', 'Walk-in'),
-        ('referral', 'Referral'),
         ('other', 'Other'),
     ]
 
@@ -76,13 +83,56 @@ class Lead(models.Model):
         ('dropped', 'Dropped'),
     ]
 
+    GENDER_CHOICES = [
+        ('male', 'Male'),
+        ('female', 'Female'),
+        ('prefer_not_to_say', 'Prefer not to say'),
+    ]
+
+    INTAKE_SEMESTER_CHOICES = [
+        ('spring', 'Spring (Jan-May)'),
+        ('fall', 'Fall (Aug-Dec)'),
+        ('summer', 'Summer (May-Aug)'),
+    ]
+
+    EDUCATION_LEVEL_CHOICES = [
+        ('high_school', 'High School (+2 / A-Level)'),
+        ('bachelors', "Bachelor's Degree"),
+        ('masters', "Master's Degree"),
+        ('diploma_certificate', 'Diploma / Certificate'),
+    ]
+
+    SCHOLARSHIP_INTEREST_CHOICES = [
+        ('yes', 'Yes, interested'),
+        ('no', 'No, self-funded'),
+        ('unsure', 'Not sure yet'),
+    ]
+
+    STUDY_MODE_CHOICES = [
+        ('on_campus', 'On-Campus'),
+        ('online', 'Online'),
+        ('hybrid', 'Hybrid'),
+    ]
+
     lead_id = models.AutoField(primary_key=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(blank=True, null=True, db_index=True)
     phone = models.CharField(max_length=20, blank=True, null=True, db_index=True)
+    date_of_birth = models.DateField(blank=True, null=True)
+    gender = models.CharField(max_length=30, choices=GENDER_CHOICES, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
-    source = models.CharField(max_length=50, choices=SOURCE_CHOICES, help_text='Facebook, Walk-in, Referral')
+    nationality = models.CharField(max_length=100, blank=True, null=True)
+    alternate_contact = models.CharField(max_length=20, blank=True, null=True)
+    program_interest = models.CharField(max_length=255, blank=True, null=True)
+    desired_intake_year = models.PositiveSmallIntegerField(blank=True, null=True)
+    intake_semester = models.CharField(max_length=20, choices=INTAKE_SEMESTER_CHOICES, blank=True, null=True)
+    highest_education_level = models.CharField(max_length=30, choices=EDUCATION_LEVEL_CHOICES, blank=True, null=True)
+    gpa_or_percentage = models.CharField(max_length=50, blank=True, null=True)
+    previous_institution = models.CharField(max_length=255, blank=True, null=True)
+    scholarship_interest = models.CharField(max_length=20, choices=SCHOLARSHIP_INTEREST_CHOICES, blank=True, null=True)
+    preferred_study_mode = models.CharField(max_length=20, choices=STUDY_MODE_CHOICES, blank=True, null=True)
+    source = models.CharField(max_length=50, choices=SOURCE_CHOICES, help_text='How the lead heard about the institution')
     current_status = models.CharField(
         max_length=50,
         choices=STATUS_CHOICES,
@@ -90,6 +140,8 @@ class Lead(models.Model):
         db_index=True,
         help_text='New, Qualified, Converted, Dropped'
     )
+    followup_date = models.DateField(blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
     assigned_staff = models.ForeignKey(
         Staff,
         on_delete=models.SET_NULL,
@@ -149,6 +201,7 @@ class Application(models.Model):
         ('pending', 'Pending'),
         ('reviewed', 'Reviewed'),
         ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
     ]
 
     app_id = models.AutoField(primary_key=True)
@@ -168,7 +221,7 @@ class Application(models.Model):
         choices=STATUS_CHOICES,
         default='pending',
         db_index=True,
-        help_text='Pending, Reviewed, Accepted'
+        help_text='Pending, Reviewed, Accepted, Rejected'
     )
     documents_url = models.URLField(blank=True, null=True)
 

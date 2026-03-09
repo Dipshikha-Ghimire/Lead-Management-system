@@ -1,0 +1,184 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Inter, sans-serif;
+}
+
+body {
+    background: #f3f6fb;
+    color: #0f172a;
+}
+
+.app {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 260px;
+    background: linear-gradient(180deg, #0b1b39 0%, #112a57 100%);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 22px 16px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+}
+
+.brand {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    line-height: 1.1;
+    border-left: 4px solid #fff;
+    padding-left: 14px;
+    margin-left: -16px;
+}
+
+
+.sidebar nav a {
+    display: block;
+    padding: 11px 12px;
+    margin-bottom: 8px;
+    border-radius: 10px;
+    color: #d5dcf5;
+    text-decoration: none;
+    transition: all .2s ease;
+}
+
+.sidebar nav a.active,
+.sidebar nav a:hover {
+    background: rgba(59, 130, 246, .42);
+    color: #fff;
+}
+
+.user-box {
+    background: rgba(8, 20, 44, .85);
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    border: 1px solid rgba(255, 255, 255, .08);
+}
+
+.user-box small {
+    color: #b6c6ee;
+}
+
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.topbar {
+    min-height: 66px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    border-bottom: 1px solid #e5e9f4;
+}
+
+.topbar input {
+    width: min(520px, 100%);
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid #d5deef;
+    background: #f8faff;
+}
+
+.topbar input:focus {
+    outline: none;
+    border-color: #93c5fd;
+}
+
+.topbar-search-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    max-width: 620px;
+    width: 100%;
+    min-width: 0;
+}
+
+.topbar-search-form input {
+    width: auto;
+    flex: 1;
+    min-width: 0;
+}
+
+.topbar-search-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #1e40af;
+    background: #1d4ed8;
+    color: #fff;
+    border-radius: 10px;
+    height: 42px;
+    padding: 0 14px;
+    flex-shrink: 0;
+    min-width: 90px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.topbar-search-btn:hover {
+    background: #1e40af;
+}
+
+.top-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #334155;
+    font-size: 14px;
+}
+
+.top-actions a {
+    text-decoration: none;
+    color: #1d4ed8;
+    font-weight: 600;
+}
+
+.page {
+    padding: 22px;
+    display: grid;
+    gap: 18px;
+}
+
+@media (max-width: 860px) {
+    .app {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+    }
+
+    .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .topbar input {
+        width: 100%;
+    }
+
+    .topbar-search-form {
+        width: 100%;
+    }
+}

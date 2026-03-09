@@ -1,46 +1,207 @@
 {% extends 'core/base.html' %}
-{% block title %}Leads{% endblock %}
+{% load static %}
+{% block title %}Lead Management{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/leads.css' %}">
+{% endblock %}
 
 {% block content %}
+<input type="hidden" id="csrfToken" value="{{ csrf_token }}">
 <section class="page-head">
-    <h1>Leads</h1>
-    <p>Track and manage student prospects through the admission pipeline.</p>
+    <div class="section-head">
+        <div>
+            <h1>Lead Management</h1>
+            <p>Manage and track student applications through the admission pipeline.</p>
+        </div>
+        <a href="{% url 'lead_form' %}" class="btn-primary add-lead-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"
+                style="margin-right:6px;">
+                <path
+                    d="M8 3.5a.5.5 0 0 1 .5.5v3.5H12a.5.5 0 0 1 0 1H8.5V12a.5.5 0 0 1-1 0V8.5H4a.5.5 0 0 1 0-1h3.5V4a.5.5 0 0 1 .5-.5z" />
+            </svg>
+            Add New Lead
+        </a>
+    </div>
 </section>
 
-<article class="card">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Program</th>
-                <th>Status</th>
-                <th>Updated</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Aarav Sharma</td>
-                <td>aarav.sharma@email.com</td>
-                <td>Computer Engineering</td>
-                <td>Capture</td>
-                <td>2025-03-01</td>
-            </tr>
-            <tr>
-                <td>Priya Adhikari</td>
-                <td>priya.adhikari@email.com</td>
-                <td>Business Administration</td>
-                <td>Qualification</td>
-                <td>2025-02-28</td>
-            </tr>
-            <tr>
-                <td>Rohan Maharjan</td>
-                <td>rohan.m@email.com</td>
-                <td>Civil Engineering</td>
-                <td>Review</td>
-                <td>2025-02-25</td>
-            </tr>
-        </tbody>
-    </table>
+<article class="card leads-card">
+    <!-- Search & Filter bar -->
+    <div class="leads-toolbar">
+        <form method="get" action="" class="leads-search-form" id="leads-filter-form">
+            <div class="leads-search-box">
+                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-4.35-4.35M16.65 16.65A7.5 7.5 0 1 0 4.5 4.5a7.5 7.5 0 0 0 12.15 12.15z" />
+                </svg>
+                <input type="text" name="q" id="lead-search" placeholder="Search leads..." value="{{ query }}"
+                    autocomplete="off" />
+            </div>
+
+            <div class="leads-filter-group">
+                <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h18M7 10h10M10 16h4" />
+                </svg>
+                <select name="status" id="status-filter"
+                    onchange="document.getElementById('leads-filter-form').submit()">
+                    <option value="" {% if not status_filter %}selected{% endif %}>All Statuses</option>
+                    {% for key, label in status_choices %}
+                    <option value="{{ key }}" {% if status_filter == key %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+        </form>
+    </div>
+
+    <!-- Table -->
+    <div class="leads-table-wrap">
+        <table class="table leads-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Student Name</th>
+                    <th>Program</th>
+                    <th>Date Captured</th>
+                    <th>Status</th>
+                    <th class="col-actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lead in lead_rows %}
+                <tr>
+                    <td class="lead-id">L{{ lead.id|stringformat:"03d" }}</td>
+                    <td>
+                        <div class="lead-name">{{ lead.name }}</div>
+                        <div class="lead-email">{{ lead.email }}</div>
+                    </td>
+                    <td>{{ lead.program }}</td>
+                    <td>{{ lead.updated|date:"Y-m-d" }}</td>
+                    <td>
+                        <span class="status-badge status-{{ lead.status_key }}">{{ lead.status }}</span>
+                    </td>
+                    <td class="col-actions">
+                        <div class="action-btns">
+                            <button class="action-btn view-btn" title="View" data-id="{{ lead.id }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                            <button class="action-btn edit-btn" title="Edit" data-id="{{ lead.id }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                </svg>
+                            </button>
+                            <button class="action-btn delete-btn" title="Delete" data-id="{{ lead.id }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                    viewBox="0 0 16 16">
+                                    <path
+                                        d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z" />
+                                    <path
+                                        d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 1 1 0-2H5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1h2.5a1 1 0 0 1 1 1ZM6 2v1h4V2H6Z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="empty-row">No leads found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </article>
+
+<div class="lead-modal" id="leadModal" aria-hidden="true">
+    <div class="lead-modal-backdrop" data-close="true"></div>
+    <div class="lead-modal-card">
+        <div class="lead-modal-head">
+            <h3 id="leadModalTitle">Lead Details</h3>
+            <button type="button" class="action-btn" id="leadModalClose" title="Close">x</button>
+        </div>
+        <form id="leadModalForm" class="lead-modal-form">
+            <input type="hidden" id="modalLeadId">
+            <div class="lead-modal-grid">
+                <label>
+                    First Name
+                    <input type="text" id="modalFirstName" required>
+                </label>
+                <label>
+                    Last Name
+                    <input type="text" id="modalLastName" required>
+                </label>
+                <label>
+                    Email
+                    <input type="email" id="modalEmail">
+                </label>
+                <label>
+                    Phone
+                    <input type="text" id="modalPhone">
+                </label>
+                <label>
+                    Program Interest
+                    <input type="text" id="modalProgramInterest">
+                </label>
+                <label>
+                    Status
+                    <select id="modalStatus">
+                        {% for key, label in status_choices %}
+                        <option value="{{ key }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>
+                    Source
+                    <select id="modalSource">
+                        {% comment %}Source options are injected by JS for reuse across CRUD actions.{% endcomment %}
+                    </select>
+                </label>
+                <label class="full">
+                    Notes
+                    <textarea id="modalNotes" rows="3"></textarea>
+                </label>
+            </div>
+            <div class="lead-modal-actions">
+                <button type="button" class="btn-primary" id="leadModalEditBtn">Edit</button>
+                <button type="submit" class="btn-primary" id="leadModalSaveBtn" hidden>Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    window.leadCrudConfig = {
+        sourceChoices: [
+            { value: 'social_media', label: 'Social Media' },
+            { value: 'google_search', label: 'Google Search' },
+            { value: 'referral', label: 'Referral' },
+            { value: 'education_fair', label: 'Education Fair' },
+            { value: 'walk_in', label: 'Walk-In' },
+            { value: 'advertisement', label: 'Advertisement' },
+            { value: 'website', label: 'Website' },
+            { value: 'alumni', label: 'Alumni' },
+            { value: 'facebook', label: 'Facebook' },
+            { value: 'walkin', label: 'Walk-in' },
+            { value: 'other', label: 'Other' }
+        ]
+    };
+</script>
+<script src="{% static 'core/js/leads.js' %}"></script>
 {% endblock %}

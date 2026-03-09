@@ -3,34 +3,38 @@
 
 {% block content %}
 <section class="hero-card">
-    <h1>Welcome back, Administrator</h1>
-    <p>Admission season is active. You have 12 new applications to review and 5 scholarship requests pending decision.</p>
+    <h1>Welcome back, {{ request.user.username }}</h1>
+    <p>Admission season is active. You have {{ pending_applications }} new applications to review and {{ pending_scholarships }} scholarship requests pending decision.</p>
     <div class="hero-actions">
         <button class="btn-primary" type="button">View Pending Tasks</button>
         <button class="btn-secondary" type="button">Generate Report</button>
+        <form method="post" action="{% url 'logout' %}" class="inline-form">
+            {% csrf_token %}
+            <button class="btn-logout" type="submit">Logout</button>
+        </form>
     </div>
 </section>
 
 <div class="cards">
     <article class="card metric-card">
         <h3>Total Leads</h3>
-        <p>2,543</p>
-        <small>+12.5% from last month</small>
+        <p>{{ total_leads }}</p>
+        <small>Total</small>
     </article>
     <article class="card metric-card">
         <h3>Qualified</h3>
-        <p>1,234</p>
-        <small>+5.2% from last month</small>
+        <p>{{ qualified_leads }}</p>
+        <small>Leads with Qualified status</small>
     </article>
     <article class="card metric-card">
         <h3>Enrolled</h3>
-        <p>456</p>
-        <small>+15.3% from last month</small>
+        <p>{{ enrolled_count }}</p>
+        <small>Accepted applications</small>
     </article>
     <article class="card metric-card">
         <h3>Revenue</h3>
-        <p>NPR 45M</p>
-        <small>+8.1% from last month</small>
+        <p>NPR {{ verified_revenue }}</p>
+        <small>Verified payments only</small>
     </article>
 </div>
 
@@ -41,11 +45,11 @@
             <span>Lead conversion rates across stages</span>
         </div>
         <ul class="status-list">
-            <li><span>Capture</span><strong>2,543</strong></li>
-            <li><span>Qualification</span><strong>1,234</strong></li>
-            <li><span>Review</span><strong>820</strong></li>
-            <li><span>Exam</span><strong>612</strong></li>
-            <li><span>Enrolled</span><strong>456</strong></li>
+            <li><span>Capture</span><strong>{{ funnel_capture }}</strong></li>
+            <li><span>Qualification</span><strong>{{ funnel_qualification }}</strong></li>
+            <li><span>Review</span><strong>{{ funnel_review }}</strong></li>
+            <li><span>Exam</span><strong>{{ funnel_exam }}</strong></li>
+            <li><span>Enrolled</span><strong>{{ funnel_enrolled }}</strong></li>
         </ul>
     </article>
 
@@ -55,10 +59,11 @@
             <span>Where are students coming from?</span>
         </div>
         <ul class="source-list">
-            <li><span>Website</span><strong>42%</strong></li>
-            <li><span>Edu Fair</span><strong>24%</strong></li>
-            <li><span>Referral</span><strong>21%</strong></li>
-            <li><span>Social</span><strong>13%</strong></li>
+            {% for source in source_totals %}
+            <li><span>{{ source.label }}</span><strong>{{ source.percent }}%</strong></li>
+            {% empty %}
+            <li><span>No data yet</span><strong>0%</strong></li>
+            {% endfor %}
         </ul>
     </article>
 </div>
@@ -78,30 +83,18 @@
             </tr>
         </thead>
         <tbody>
+            {% for lead in recent_leads %}
             <tr>
-                <td>Aarav Sharma</td>
-                <td>Computer Engineering</td>
-                <td>Capture</td>
-                <td>2025-03-01</td>
+                <td>{{ lead.name }}</td>
+                <td>{{ lead.program }}</td>
+                <td>{{ lead.stage }}</td>
+                <td>{{ lead.date|date:"Y-m-d" }}</td>
             </tr>
+            {% empty %}
             <tr>
-                <td>Priya Adhikari</td>
-                <td>Business Administration</td>
-                <td>Qualification</td>
-                <td>2025-02-28</td>
+                <td colspan="4">No leads found.</td>
             </tr>
-            <tr>
-                <td>Rohan Maharjan</td>
-                <td>Civil Engineering</td>
-                <td>Review</td>
-                <td>2025-02-25</td>
-            </tr>
-            <tr>
-                <td>Sita Gurung</td>
-                <td>Environmental Science</td>
-                <td>Exam</td>
-                <td>2025-02-20</td>
-            </tr>
+            {% endfor %}
         </tbody>
     </table>
 </article>
