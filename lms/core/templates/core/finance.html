@@ -10,18 +10,18 @@
 <div class="cards cards-3">
 	<article class="card metric-card">
 		<h3>Total Revenue</h3>
-		<p>NPR 45M</p>
-		<small>+8.1% from last month</small>
+		<p>NPR {{ total_revenue|default:"0.00" }}</p>
+		<small>Verified payments</small>
 	</article>
 	<article class="card metric-card">
 		<h3>Pending Fees</h3>
-		<p>NPR 3.4M</p>
-		<small>82 accounts overdue</small>
+		<p>NPR {{ pending_fees|default:"0.00" }}</p>
+		<small>{{ pending_count }} accounts overdue</small>
 	</article>
 	<article class="card metric-card">
 		<h3>Scholarships</h3>
-		<p>NPR 6.2M</p>
-		<small>154 awards approved</small>
+		<p>{{ approved_scholarships }}</p>
+		<small>Awards approved</small>
 	</article>
 </div>
 
@@ -32,14 +32,32 @@
 				<th>Student</th>
 				<th>Program</th>
 				<th>Type</th>
-				<th>Amount</th>
+				<th>Amount (NPR)</th>
 				<th>Status</th>
 			</tr>
 		</thead>
 		<tbody>
-			<tr><td>Binita Sharma</td><td>BBA</td><td>Tuition Fee</td><td>NPR 120,000</td><td>Paid</td></tr>
-			<tr><td>Ritesh Tamang</td><td>Engineering</td><td>Scholarship</td><td>NPR 75,000</td><td>Approved</td></tr>
-			<tr><td>Manisha KC</td><td>Science</td><td>Lab Fee</td><td>NPR 18,000</td><td>Pending</td></tr>
+			{% for payment in recent_payments %}
+			<tr>
+				<td>{{ payment.lead.first_name }} {{ payment.lead.last_name }}</td>
+				<td>{{ payment.application.program.name|default:"-" }}</td>
+				<td>{{ payment.get_payment_type_display }}</td>
+				<td>{{ payment.amount }}</td>
+				<td>
+					{% if payment.status == 'verified' %}
+					<span class="status-badge" style="color: green;">{{ payment.get_status_display }}</span>
+					{% elif payment.status == 'pending' %}
+					<span class="status-badge" style="color: orange;">{{ payment.get_status_display }}</span>
+					{% else %}
+					<span class="status-badge" style="color: red;">{{ payment.get_status_display }}</span>
+					{% endif %}
+				</td>
+			</tr>
+			{% empty %}
+			<tr>
+				<td colspan="5" style="text-align: center;">No recent payments found.</td>
+			</tr>
+			{% endfor %}
 		</tbody>
 	</table>
 </article>

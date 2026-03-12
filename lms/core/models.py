@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.auth.models import User
 
 # 1. ORGANIZATIONAL STRUCTURE
 
@@ -51,6 +52,9 @@ class Staff(models.Model):
     full_name = models.CharField(max_length=255)
     email = models.EmailField(unique=True, db_index=True)
     role = models.CharField(max_length=50, choices=ROLE_CHOICES, help_text='e.g. Counselor, Admin, Finance')
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    bio = models.TextField(blank=True, null=True)
+    department = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         db_table = 'staff'
@@ -79,7 +83,11 @@ class Lead(models.Model):
     STATUS_CHOICES = [
         ('new', 'New'),
         ('qualified', 'Qualified'),
-        ('converted', 'Converted'),
+        ('followup', 'Follow-up'),
+        ('exams', 'Exams'),
+        ('passed', 'Passed'),
+        ('failed', 'Failed'),
+        ('enrolled', 'Enrolled'),
         ('dropped', 'Dropped'),
     ]
 
@@ -202,6 +210,7 @@ class Application(models.Model):
         ('reviewed', 'Reviewed'),
         ('accepted', 'Accepted'),
         ('rejected', 'Rejected'),
+        ('removed', 'Removed'),
     ]
 
     app_id = models.AutoField(primary_key=True)
@@ -224,6 +233,8 @@ class Application(models.Model):
         help_text='Pending, Reviewed, Accepted, Rejected'
     )
     documents_url = models.URLField(blank=True, null=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
+    rejected_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'applications'
@@ -368,3 +379,29 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment {self.pay_id} - {self.amount} - {self.status}"
+
+
+class Notification(models.Model):
+    NOTIFICATION_TYPES = [
+        ('new_lead', 'New Lead'),
+        ('new_application', 'New Application'),
+        ('application_approved', 'Application Approved'),
+        ('application_rejected', 'Application Rejected'),
+    ]
+
+    notification_id = models.AutoField(primary_key=True)
+    notification_type = models.CharField(max_length=50, choices=NOTIFICATION_TYPES)
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    link = models.CharField(max_length=255, blank=True, null=True)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'notifications'
+        verbose_name = 'Notification'
+        verbose_name_plural = 'Notifications'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title

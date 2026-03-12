@@ -1,0 +1,61 @@
+{% extends "admin/index.html" %}
+
+{% block content %}
+<div class="admin-overview-grid">
+  <section class="metric-card">
+    <p class="metric-label">Total Leads</p>
+    <p class="metric-value">{{ admin_metrics.lead_count }}</p>
+  </section>
+  <section class="metric-card">
+    <p class="metric-label">Applications</p>
+    <p class="metric-value">{{ admin_metrics.application_count }}</p>
+  </section>
+  <section class="metric-card warning">
+    <p class="metric-label">Pending Applications</p>
+    <p class="metric-value">{{ admin_metrics.pending_applications }}</p>
+  </section>
+  <section class="metric-card danger">
+    <p class="metric-label">Due Follow-ups</p>
+    <p class="metric-value">{{ admin_metrics.due_followups }}</p>
+  </section>
+  <section class="metric-card success">
+    <p class="metric-label">Verified Payments</p>
+    <p class="metric-value">{{ admin_metrics.payment_verified_count }}</p>
+  </section>
+  <section class="metric-card">
+    <p class="metric-label">Verified Amount</p>
+    <p class="metric-value">Rs. {{ admin_metrics.payment_verified_total }}</p>
+  </section>
+</div>
+
+<div class="admin-insights-row">
+  <section class="admin-panel">
+    <h2>Lead Funnel</h2>
+    <div class="status-row">
+      {% for item in lead_status_summary %}
+      <span class="admin-badge tone-{{ item.tone }}">{{ item.label }}: {{ item.count }}</span>
+      {% endfor %}
+    </div>
+  </section>
+  <section class="admin-panel">
+    <h2>Application Pipeline</h2>
+    <div class="status-row">
+      {% for item in application_status_summary %}
+      <span class="admin-badge tone-{{ item.tone }}">{{ item.label }}: {{ item.count }}</span>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+
+<section class="admin-panel quick-actions-panel">
+  <h2>Quick Actions</h2>
+  <div class="quick-actions-grid">
+    <a class="quick-action" href="{% url 'admin:core_lead_add' %}">Add New Lead</a>
+    <a class="quick-action" href="{% url 'admin:core_application_add' %}">Create Application</a>
+    <a class="quick-action" href="{% url 'admin:core_followup_add' %}">Schedule Follow-up</a>
+    <a class="quick-action" href="{% url 'admin:core_payment_add' %}">Record Payment</a>
+  </div>
+</section>
+
+{{ block.super }}
+{% endblock %}

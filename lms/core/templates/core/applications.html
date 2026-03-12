@@ -8,156 +8,363 @@
 
 {% block content %}
 <input type="hidden" id="csrfToken" value="{{ csrf_token }}">
+
 <section class="page-head applications-head">
     <div>
-        <h1>Applications</h1>
-        <p>Monitor submitted applications and decision progress.</p>
+        <h1>Application Management</h1>
+        <p>Review, approve, and manage student applications</p>
     </div>
-    <button type="button" class="btn-primary" id="addApplicationBtn">Add Application</button>
 </section>
 
-<article class="card applications-filter-card">
-    <form method="get" action="" class="applications-filter-form">
-        <input type="text" name="q" value="{{ query }}" placeholder="Search applicant, email, program, status" class="input-text">
-        <select name="status" class="select-input">
-            <option value="" {% if not status_filter %}selected{% endif %}>All Statuses</option>
-            {% for key, label in status_choices %}
-            <option value="{{ key }}" {% if status_filter == key %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-        </select>
-        <button type="submit" class="btn-primary">Filter</button>
-    </form>
-</article>
-
-<div class="cards cards-3">
-    <article class="card metric-card">
-        <h3>Submitted</h3>
-        <p id="totalSubmittedMetric">{{ total_submitted }}</p>
-        <small>Total applications in database</small>
-    </article>
-    <article class="card metric-card">
-        <h3>Reviewed</h3>
-        <p id="reviewedMetric">{{ reviewed_count }}</p>
-        <small>Status: Reviewed</small>
-    </article>
-    <article class="card metric-card">
-        <h3>Accepted</h3>
-        <p id="acceptedMetric">{{ accepted_count }}</p>
-        <small>Status: Accepted</small>
-    </article>
+<div class="app-tabs">
+    <button class="app-tab active" data-tab="pending">
+        <span class="tab-icon">📋</span>
+        <span class="tab-label">Pending Review</span>
+        <span class="tab-count" id="pendingCount">{{ pending_count }}</span>
+    </button>
+    <button class="app-tab" data-tab="approved">
+        <span class="tab-icon">✓</span>
+        <span class="tab-label">Approved</span>
+        <span class="tab-count" id="approvedCount">{{ approved_count }}</span>
+    </button>
+    <button class="app-tab" data-tab="rejected">
+        <span class="tab-icon">✕</span>
+        <span class="tab-label">Rejected</span>
+        <span class="tab-count" id="rejectedCount">{{ rejected_count }}</span>
+    </button>
 </div>
 
-<article class="card">
-    <table class="table applications-table" id="applicationsTable">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Applicant</th>
-                <th>Program</th>
-                <th>Status</th>
-                <th>Submitted</th>
-                <th class="col-actions">Actions</th>
-            </tr>
-        </thead>
-        <tbody id="applicationsTableBody">
-            {% for application in application_rows %}
-            <tr data-app-id="{{ application.id }}">
-                <td class="app-id">A{{ application.id|stringformat:"04d" }}</td>
-                <td>
-                    <div class="applicant-name">{{ application.applicant }}</div>
-                    <small class="applicant-email">{{ application.email }}</small>
-                </td>
-                <td class="program-name">{{ application.program }}</td>
-                <td>
-                    <span class="status-badge status-{{ application.status_key }}">{{ application.status }}</span>
-                </td>
-                <td class="submitted-date">{{ application.submitted|date:"Y-m-d" }}</td>
-                <td class="col-actions">
-                    <div class="action-btns workflow-btns">
-                        <button type="button" class="action-btn review-btn app-action-btn" data-action="review" title="Mark reviewed and set lead qualified" data-id="{{ application.id }}">Review</button>
-                        <button type="button" class="action-btn accept-btn app-action-btn" data-action="accept" title="Accept and set lead converted" data-id="{{ application.id }}">Accept</button>
-                        <button type="button" class="action-btn reject-btn app-action-btn" data-action="reject" title="Reject and set lead dropped" data-id="{{ application.id }}">Reject</button>
+<div class="app-sections">
+    <!-- PENDING REVIEW SECTION -->
+    <section class="app-section active" id="pendingSection">
+        {% if pending_rows %}
+        <div class="application-cards">
+            {% for app in pending_rows %}
+            <div class="application-card" data-app-id="{{ app.id }}">
+                <div class="card-header">
+                    <div class="student-avatar">{{ app.applicant|slice:1|upper }}</div>
+                    <div class="student-info">
+                        <h3 class="student-name">{{ app.applicant }}</h3>
+                        <p class="student-email">{{ app.email }}</p>
                     </div>
-                    <div class="action-btns">
-                        <button type="button" class="action-btn app-view-btn" title="View" data-id="{{ application.id }}">View</button>
-                        <button type="button" class="action-btn app-edit-btn" title="Edit" data-id="{{ application.id }}">Edit</button>
-                        <button type="button" class="action-btn delete-btn app-delete-btn" title="Delete" data-id="{{ application.id }}">Delete</button>
+                    <span class="status-badge status-pending">Pending</span>
+                </div>
+                <div class="card-body">
+                    <div class="info-row">
+                        <span class="info-label">Program:</span>
+                        <span class="info-value">{{ app.program }}</span>
                     </div>
-                </td>
-            </tr>
-            {% empty %}
-            <tr id="emptyApplicationsRow">
-                <td colspan="6" class="empty-row">No applications found in database.</td>
-            </tr>
+                    <div class="info-row">
+                        <span class="info-label">Phone:</span>
+                        <span class="info-value">{{ app.phone }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Submitted:</span>
+                        <span class="info-value">{{ app.submitted }}</span>
+                    </div>
+                </div>
+                <div class="card-actions">
+                    <button type="button" class="action-btn view-btn app-view-btn" 
+                        data-id="{{ app.id }}"
+                        data-applicant="{{ app.applicant }}"
+                        data-email="{{ app.email }}"
+                        data-phone="{{ app.phone }}"
+                        data-program="{{ app.program }}"
+                        data-submitted="{{ app.submitted }}"
+                        data-dob="{{ app.date_of_birth }}"
+                        data-gender="{{ app.gender }}"
+                        data-address="{{ app.address }}"
+                        data-nationality="{{ app.nationality }}"
+                        data-alt-contact="{{ app.alternate_contact }}"
+                        data-intake-year="{{ app.desired_intake_year }}"
+                        data-intake-sem="{{ app.intake_semester }}"
+                        data-education="{{ app.highest_education_level }}"
+                        data-gpa="{{ app.gpa_or_percentage }}"
+                        data-institution="{{ app.previous_institution }}"
+                        data-scholarship="{{ app.scholarship_interest }}"
+                        data-study-mode="{{ app.preferred_study_mode }}"
+                        data-source="{{ app.source }}"
+                        data-lead-status="{{ app.lead_status }}"
+                        data-counselor="{{ app.assigned_counselor }}"
+                        data-followup="{{ app.followup_date }}"
+                        data-notes="{{ app.notes }}"
+                        title="View Application">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        View
+                    </button>
+                    <button type="button" class="action-btn approve-btn app-approve-btn" data-id="{{ app.id }}" title="Approve Application">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                        Approve
+                    </button>
+                    <button type="button" class="action-btn reject-btn app-reject-btn" data-id="{{ app.id }}" title="Reject Application">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        Reject
+                    </button>
+                </div>
+            </div>
             {% endfor %}
-        </tbody>
-    </table>
-</article>
-
-<div class="app-modal" id="applicationModal" aria-hidden="true">
-    <div class="app-modal-backdrop" data-close="true"></div>
-    <div class="app-modal-card">
-        <div class="app-modal-head">
-            <h3 id="applicationModalTitle">Application</h3>
-            <button type="button" class="action-btn" id="applicationModalClose" title="Close">x</button>
         </div>
-        <form id="applicationForm" class="app-modal-form">
-            <input type="hidden" id="applicationId">
-            <div class="app-modal-grid">
-                <label>
-                    Lead
-                    <select id="applicationLead" required>
-                        <option value="">Select lead</option>
-                        {% for lead in lead_choices %}
-                        <option value="{{ lead.lead_id }}">{{ lead.first_name }} {{ lead.last_name }}</option>
-                        {% endfor %}
-                    </select>
-                </label>
-                <label>
-                    Program
-                    <select id="applicationProgram" required>
-                        <option value="">Select program</option>
-                        {% for program in program_choices %}
-                        <option value="{{ program.prog_id }}">{{ program.name }}</option>
-                        {% endfor %}
-                    </select>
-                </label>
-                <label>
-                    Lead First Name
-                    <input type="text" id="applicationLeadFirstName" required>
-                </label>
-                <label>
-                    Lead Last Name
-                    <input type="text" id="applicationLeadLastName" required>
-                </label>
-                <label>
-                    Lead Email
-                    <input type="email" id="applicationLeadEmail" placeholder="student@email.com">
-                </label>
-                <label>
-                    Lead Program Interest
-                    <input type="text" id="applicationLeadProgramInterest" placeholder="Program selected in Add Lead">
-                </label>
-                <label>
-                    Status
-                    <select id="applicationStatus" required>
-                        {% for key, label in status_choices %}
-                        <option value="{{ key }}">{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </label>
-                <label>
-                    Documents URL
-                    <input type="url" id="applicationDocumentsUrl" placeholder="https://example.com/docs">
-                </label>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <h3>No Pending Applications</h3>
+            <p>All applications have been reviewed. New submissions will appear here.</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- APPROVED SECTION -->
+    <section class="app-section" id="approvedSection">
+        {% if approved_rows %}
+        <div class="application-cards">
+            {% for app in approved_rows %}
+            <div class="application-card approved-card" data-app-id="{{ app.id }}">
+                <div class="card-header">
+                    <div class="student-avatar approved-avatar">{{ app.applicant|slice:1|upper }}</div>
+                    <div class="student-info">
+                        <h3 class="student-name">{{ app.applicant }}</h3>
+                        <p class="student-email">{{ app.email }}</p>
+                    </div>
+                    <span class="status-badge status-approved">Approved</span>
+                </div>
+                <div class="card-body">
+                    <div class="info-row">
+                        <span class="info-label">Program:</span>
+                        <span class="info-value">{{ app.program }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Phone:</span>
+                        <span class="info-value">{{ app.phone }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Approved:</span>
+                        <span class="info-value">{{ app.approved_at }}</span>
+                    </div>
+                    <div class="expiry-badge">
+                        <span class="expiry-icon">⏱</span>
+                        Expires in {{ app.remaining_days }} days
+                    </div>
+                </div>
+                <div class="card-actions">
+                    <button type="button" class="action-btn view-btn app-view-btn" data-id="{{ app.id }}" title="View Application">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        View
+                    </button>
+                </div>
             </div>
-            <div class="app-modal-actions">
-                <button type="button" class="btn-primary" id="applicationModalEditBtn">Edit</button>
-                <button type="submit" class="btn-primary" id="applicationModalSaveBtn" hidden>Save</button>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">✓</div>
+            <h3>No Recently Approved Applications</h3>
+            <p>Approved applications appear here and expire after 3 days.</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- REJECTED SECTION -->
+    <section class="app-section" id="rejectedSection">
+        {% if rejected_rows %}
+        <div class="application-cards">
+            {% for app in rejected_rows %}
+            <div class="application-card rejected-card" data-app-id="{{ app.id }}">
+                <div class="card-header">
+                    <div class="student-avatar rejected-avatar">{{ app.applicant|slice:1|upper }}</div>
+                    <div class="student-info">
+                        <h3 class="student-name">{{ app.applicant }}</h3>
+                        <p class="student-email">{{ app.email }}</p>
+                    </div>
+                    <span class="status-badge status-rejected">Rejected</span>
+                </div>
+                <div class="card-body">
+                    <div class="info-row">
+                        <span class="info-label">Program:</span>
+                        <span class="info-value">{{ app.program }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Phone:</span>
+                        <span class="info-value">{{ app.phone }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Rejected:</span>
+                        <span class="info-value">{{ app.rejected_at }}</span>
+                    </div>
+                </div>
+                <div class="card-actions">
+                    <button type="button" class="action-btn view-btn app-view-btn" data-id="{{ app.id }}" title="View Application">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        View
+                    </button>
+                    <button type="button" class="action-btn restore-btn app-restore-btn" data-id="{{ app.id }}" title="Restore Application">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                        Restore
+                    </button>
+                    <button type="button" class="action-btn delete-btn app-permanent-delete-btn" data-id="{{ app.id }}" title="Delete Permanently">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        Delete
+                    </button>
+                </div>
             </div>
-        </form>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">✕</div>
+            <h3>No Rejected Applications</h3>
+            <p>Rejected applications will appear here for restoration or permanent deletion.</p>
+        </div>
+        {% endif %}
+    </section>
+</div>
+
+<!-- VIEW APPLICATION MODAL -->
+<div class="app-modal" id="viewApplicationModal" aria-hidden="true">
+    <div class="app-modal-backdrop" data-close="true"></div>
+    <div class="app-modal-card view-modal-card">
+        <div class="app-modal-head">
+            <h3 id="viewModalTitle">Application Details</h3>
+            <button type="button" class="action-btn" id="viewModalClose" title="Close">×</button>
+        </div>
+        <div class="app-modal-body">
+            <div class="view-section">
+                <h4 class="view-section-title">
+                    <span class="section-icon">👤</span>
+                    Personal Information
+                </h4>
+                <div class="view-grid">
+                    <div class="view-field">
+                        <label>Full Name</label>
+                        <span id="viewFullName">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Email</label>
+                        <span id="viewEmail">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Phone</label>
+                        <span id="viewPhone">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Date of Birth</label>
+                        <span id="viewDob">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Gender</label>
+                        <span id="viewGender">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Nationality</label>
+                        <span id="viewNationality">—</span>
+                    </div>
+                    <div class="view-field full">
+                        <label>Address</label>
+                        <span id="viewAddress">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Alternate Contact</label>
+                        <span id="viewAltContact">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="view-section">
+                <h4 class="view-section-title">
+                    <span class="section-icon">🎓</span>
+                    Academic Information
+                </h4>
+                <div class="view-grid">
+                    <div class="view-field full">
+                        <label>Program of Interest</label>
+                        <span id="viewProgram">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Intake Year</label>
+                        <span id="viewIntakeYear">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Intake Semester</label>
+                        <span id="viewIntakeSem">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Education Level</label>
+                        <span id="viewEducation">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>GPA/Percentage</label>
+                        <span id="viewGpa">—</span>
+                    </div>
+                    <div class="view-field full">
+                        <label>Previous Institution</label>
+                        <span id="viewInstitution">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Scholarship Interest</label>
+                        <span id="viewScholarship">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Study Mode</label>
+                        <span id="viewStudyMode">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="view-section">
+                <h4 class="view-section-title">
+                    <span class="section-icon">📋</span>
+                    Lead Details
+                </h4>
+                <div class="view-grid">
+                    <div class="view-field">
+                        <label>Source</label>
+                        <span id="viewSource">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Lead Status</label>
+                        <span id="viewLeadStatus">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Assigned Counselor</label>
+                        <span id="viewCounselor">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Follow-up Date</label>
+                        <span id="viewFollowup">—</span>
+                    </div>
+                    <div class="view-field full">
+                        <label>Notes</label>
+                        <span id="viewNotes">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="view-section">
+                <h4 class="view-section-title">
+                    <span class="section-icon">📝</span>
+                    Application Info
+                </h4>
+                <div class="view-grid">
+                    <div class="view-field">
+                        <label>Application ID</label>
+                        <span id="viewAppId">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Submitted Date</label>
+                        <span id="viewSubmitted">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Status</label>
+                        <span id="viewStatus">—</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="app-modal-actions" id="viewModalActions">
+            <!-- Actions will be dynamically added based on current tab -->
+        </div>
     </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}

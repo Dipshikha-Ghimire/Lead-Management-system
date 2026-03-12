@@ -89,9 +89,9 @@
                             <label>Gender</label>
                             <select id="gender">
                                 <option value="">Select gender</option>
-                                <option>Male</option>
-                                <option>Female</option>
-                                <option>Prefer not to say</option>
+                                {% for key, label in gender_choices %}
+                                <option value="{{ key }}">{{ label }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                         <div class="field full">
@@ -125,25 +125,15 @@
                             <label>Program of Interest <span class="req">*</span></label>
                             <select id="program">
                                 <option value="">Select a program</option>
-                                <optgroup label="Undergraduate">
-                                    <option>B.Sc. Computer Science</option>
-                                    <option>B.Sc. Information Technology</option>
-                                    <option>BBA – Business Administration</option>
-                                    <option>B.Eng. Civil Engineering</option>
-                                    <option>B.Sc. Architecture</option>
-                                    <option>BA Psychology</option>
+                                {% for item in department_programs %}
+                                <optgroup label="{{ item.department.name }}">
+                                    {% for program in item.programs %}
+                                    <option value="{{ program.name }}">{{ program.name }}</option>
+                                    {% endfor %}
                                 </optgroup>
-                                <optgroup label="Postgraduate">
-                                    <option>MBA – General Management</option>
-                                    <option>MBA – Finance & Banking</option>
-                                    <option>M.Sc. Data Science</option>
-                                    <option>M.Sc. Artificial Intelligence</option>
-                                    <option>LLM – Law</option>
-                                </optgroup>
-                                <optgroup label="Short Courses">
-                                    <option>AI In Education</option>
-                                    <option>Educational Psychology</option>
-                                </optgroup>
+                                {% empty %}
+                                <option value="" disabled>No programs available</option>
+                                {% endfor %}
                             </select>
                             <span class="error-msg" id="programErr">Please select a program</span>
                         </div>
@@ -151,9 +141,9 @@
                             <label>Desired Intake Year <span class="req">*</span></label>
                             <select id="intakeYear">
                                 <option value="">Select year</option>
-                                <option>2025</option>
-                                <option>2026</option>
-                                <option>2027</option>
+                                {% for year in intake_year_choices %}
+                                <option value="{{ year }}">{{ year }}</option>
+                                {% endfor %}
                             </select>
                             <span class="error-msg" id="intakeYearErr">Please select intake year</span>
                         </div>
@@ -161,19 +151,18 @@
                             <label>Intake Semester</label>
                             <select id="intakeSem">
                                 <option value="">Select semester</option>
-                                <option>Spring (Jan–May)</option>
-                                <option>Fall (Aug–Dec)</option>
-                                <option>Summer (May–Aug)</option>
+                                {% for key, label in intake_semester_choices %}
+                                <option value="{{ key }}">{{ label }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                         <div class="field">
                             <label>Highest Education Level</label>
                             <select id="eduLevel">
                                 <option value="">Select level</option>
-                                <option>High School (+2 / A-Level)</option>
-                                <option>Bachelor's Degree</option>
-                                <option>Master's Degree</option>
-                                <option>Diploma / Certificate</option>
+                                {% for key, label in education_level_choices %}
+                                <option value="{{ key }}">{{ label }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                         <div class="field">
@@ -187,17 +176,17 @@
                         <div class="field full">
                             <label>Scholarship / Financial Aid Interest</label>
                             <div class="radio-group">
-                                <label><input type="radio" name="scholarship" value="Yes" /> Yes, interested</label>
-                                <label><input type="radio" name="scholarship" value="No" /> No, self-funded</label>
-                                <label><input type="radio" name="scholarship" value="Unsure" /> Not sure yet</label>
+                                {% for key, label in scholarship_choices %}
+                                <label><input type="radio" name="scholarship" value="{{ key }}" /> {{ label }}</label>
+                                {% endfor %}
                             </div>
                         </div>
                         <div class="field full">
                             <label>Preferred Mode of Study</label>
                             <div class="radio-group">
-                                <label><input type="radio" name="mode" value="On-campus" /> 🏛 On-Campus</label>
-                                <label><input type="radio" name="mode" value="Online" /> 💻 Online</label>
-                                <label><input type="radio" name="mode" value="Hybrid" /> 🔀 Hybrid</label>
+                                {% for key, label in study_mode_choices %}
+                                <label><input type="radio" name="mode" value="{{ key }}" /> {{ label }}</label>
+                                {% endfor %}
                             </div>
                         </div>
                     </div>
@@ -218,15 +207,9 @@
                         <div class="field full">
                             <label>How did you hear about us? <span class="req">*</span></label>
                             <div class="source-tags" id="sourceTags">
-                                <button type="button" class="tag-btn" data-val="Social Media">📱 Social Media</button>
-                                <button type="button" class="tag-btn" data-val="Google Search">🔍 Google Search</button>
-                                <button type="button" class="tag-btn" data-val="Referral">🤝 Referral</button>
-                                <button type="button" class="tag-btn" data-val="Education Fair">🎪 Education
-                                    Fair</button>
-                                <button type="button" class="tag-btn" data-val="Walk-In">🚶 Walk-In</button>
-                                <button type="button" class="tag-btn" data-val="Advertisement">📺 Advertisement</button>
-                                <button type="button" class="tag-btn" data-val="Website">🌐 Website</button>
-                                <button type="button" class="tag-btn" data-val="Alumni">🎓 Alumni</button>
+                                {% for key, label in source_choices %}
+                                <button type="button" class="tag-btn" data-val="{{ key }}" data-label="{{ label }}">{{ label }}</button>
+                                {% endfor %}
                             </div>
                             <input type="hidden" id="leadSource" />
                             <span class="error-msg" id="leadSourceErr">Please select a source</span>
@@ -251,10 +234,11 @@
                             <label>Assigned Counselor</label>
                             <select id="counselor">
                                 <option disabled selected value="">Select Counselor</option>
-                                <option>Priya Tamang</option>
-                                <option>Rajesh Adhikari</option>
-                                <option>Sushila Rai</option>
-                                <option>Deepak Thapa</option>
+                                {% for counselor in counselor_choices %}
+                                <option value="{{ counselor.staff_id }}">{{ counselor.full_name }}</option>
+                                {% empty %}
+                                <option value="" disabled>No staff available</option>
+                                {% endfor %}
                             </select>
                         </div>
 

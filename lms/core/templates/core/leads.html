@@ -8,15 +8,16 @@
 
 {% block content %}
 <input type="hidden" id="csrfToken" value="{{ csrf_token }}">
+
 <section class="page-head">
     <div class="section-head">
         <div>
-            <h1>Lead Management</h1>
-            <p>Manage and track student applications through the admission pipeline.</p>
+            <h1>Enrolled Students</h1>
+            <p>View and manage approved student enrollments.</p>
         </div>
         <a href="{% url 'lead_form' %}" class="btn-primary add-lead-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"
-                style="margin-right:6px;">
+            <svg class="add-lead-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                viewBox="0 0 16 16">
                 <path
                     d="M8 3.5a.5.5 0 0 1 .5.5v3.5H12a.5.5 0 0 1 0 1H8.5V12a.5.5 0 0 1-1 0V8.5H4a.5.5 0 0 1 0-1h3.5V4a.5.5 0 0 1 .5-.5z" />
             </svg>
@@ -26,7 +27,6 @@
 </section>
 
 <article class="card leads-card">
-    <!-- Search & Filter bar -->
     <div class="leads-toolbar">
         <form method="get" action="" class="leads-search-form" id="leads-filter-form">
             <div class="leads-search-box">
@@ -35,17 +35,15 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M21 21l-4.35-4.35M16.65 16.65A7.5 7.5 0 1 0 4.5 4.5a7.5 7.5 0 0 0 12.15 12.15z" />
                 </svg>
-                <input type="text" name="q" id="lead-search" placeholder="Search leads..." value="{{ query }}"
+                <input type="text" name="q" id="lead-search" placeholder="Search students..." value="{{ query }}"
                     autocomplete="off" />
             </div>
-
             <div class="leads-filter-group">
                 <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h18M7 10h10M10 16h4" />
                 </svg>
-                <select name="status" id="status-filter"
-                    onchange="document.getElementById('leads-filter-form').submit()">
+                <select name="status" id="status-filter" onchange="document.getElementById('leads-filter-form').submit()">
                     <option value="" {% if not status_filter %}selected{% endif %}>All Statuses</option>
                     {% for key, label in status_choices %}
                     <option value="{{ key }}" {% if status_filter == key %}selected{% endif %}>{{ label }}</option>
@@ -56,10 +54,10 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
             </div>
+            <button type="submit" class="btn-primary search-btn">Search</button>
         </form>
     </div>
 
-    <!-- Table -->
     <div class="leads-table-wrap">
         <table class="table leads-table">
             <thead>
@@ -72,22 +70,46 @@
                     <th class="col-actions">Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="leadsTableBody">
                 {% for lead in lead_rows %}
-                <tr>
-                    <td class="lead-id">L{{ lead.id|stringformat:"03d" }}</td>
+                <tr data-lead-id="{{ lead.id }}">
+                    <td class="lead-id">L{{ lead.id|stringformat:"04d" }}</td>
                     <td>
                         <div class="lead-name">{{ lead.name }}</div>
                         <div class="lead-email">{{ lead.email }}</div>
                     </td>
-                    <td>{{ lead.program }}</td>
-                    <td>{{ lead.updated|date:"Y-m-d" }}</td>
+                    <td class="lead-cell-program">{{ lead.program }}</td>
+                    <td class="lead-cell-date">{{ lead.date_captured }}</td>
                     <td>
                         <span class="status-badge status-{{ lead.status_key }}">{{ lead.status }}</span>
                     </td>
                     <td class="col-actions">
                         <div class="action-btns">
-                            <button class="action-btn view-btn" title="View" data-id="{{ lead.id }}">
+                            <button class="action-btn view-btn lead-view-btn" 
+                                title="View" 
+                                data-id="{{ lead.id }}"
+                                data-name="{{ lead.name }}"
+                                data-email="{{ lead.email }}"
+                                data-phone="{{ lead.phone }}"
+                                data-program="{{ lead.program }}"
+                                data-date-captured="{{ lead.date_captured }}"
+                                data-dob="{{ lead.date_of_birth }}"
+                                data-gender="{{ lead.gender }}"
+                                data-address="{{ lead.address }}"
+                                data-nationality="{{ lead.nationality }}"
+                                data-alt-contact="{{ lead.alternate_contact }}"
+                                data-intake-year="{{ lead.desired_intake_year }}"
+                                data-intake-sem="{{ lead.intake_semester }}"
+                                data-education="{{ lead.highest_education_level }}"
+                                data-gpa="{{ lead.gpa_or_percentage }}"
+                                data-institution="{{ lead.previous_institution }}"
+                                data-scholarship="{{ lead.scholarship_interest }}"
+                                data-study-mode="{{ lead.preferred_study_mode }}"
+                                data-source="{{ lead.source }}"
+                                data-lead-status="{{ lead.lead_status }}"
+                                data-counselor="{{ lead.assigned_counselor }}"
+                                data-followup="{{ lead.followup_date }}"
+                                data-notes="{{ lead.notes }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -95,8 +117,11 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
+                                View
                             </button>
-                            <button class="action-btn edit-btn" title="Edit" data-id="{{ lead.id }}">
+                            <button class="action-btn edit-btn lead-edit-btn" 
+                                title="Edit" 
+                                data-id="{{ lead.id }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -104,8 +129,9 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                                 </svg>
+                                Edit
                             </button>
-                            <button class="action-btn delete-btn" title="Delete" data-id="{{ lead.id }}">
+                            <button class="action-btn delete-btn lead-delete-btn" title="Delete" data-id="{{ lead.id }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                     viewBox="0 0 16 16">
                                     <path
@@ -113,13 +139,20 @@
                                     <path
                                         d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 1 1 0-2H5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1h2.5a1 1 0 0 1 1 1ZM6 2v1h4V2H6Z" />
                                 </svg>
+                                Delete
                             </button>
                         </div>
                     </td>
                 </tr>
                 {% empty %}
-                <tr>
-                    <td colspan="6" class="empty-row">No leads found.</td>
+                <tr id="emptyLeadsRow">
+                    <td colspan="6" class="empty-row">
+                        <div class="empty-state">
+                            <div class="empty-icon">👥</div>
+                            <h3>No Enrolled Students</h3>
+                            <p>Students will appear here after their application is approved.</p>
+                        </div>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -127,39 +160,265 @@
     </div>
 </article>
 
-<div class="lead-modal" id="leadModal" aria-hidden="true">
+<!-- View Lead Modal -->
+<div class="lead-modal" id="leadViewModal" aria-hidden="true">
+    <div class="lead-modal-backdrop" data-close="true"></div>
+    <div class="lead-modal-card lead-view-modal">
+        <div class="lead-modal-head">
+            <h3 id="leadViewModalTitle">Lead Details</h3>
+            <button type="button" class="action-btn" id="leadViewModalClose" title="Close">×</button>
+        </div>
+        <div class="lead-modal-body">
+            <div class="view-section">
+                <h4 class="view-section-title">
+                    <span class="section-icon">👤</span>
+                    Personal Information
+                </h4>
+                <div class="view-grid">
+                    <div class="view-field">
+                        <label>Full Name</label>
+                        <span id="viewLeadName">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Email</label>
+                        <span id="viewLeadEmail">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Phone</label>
+                        <span id="viewLeadPhone">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Date of Birth</label>
+                        <span id="viewLeadDob">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Gender</label>
+                        <span id="viewLeadGender">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Nationality</label>
+                        <span id="viewLeadNationality">—</span>
+                    </div>
+                    <div class="view-field full">
+                        <label>Address</label>
+                        <span id="viewLeadAddress">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Alternate Contact</label>
+                        <span id="viewLeadAltContact">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="view-section">
+                <h4 class="view-section-title">
+                    <span class="section-icon">🎓</span>
+                    Academic Information
+                </h4>
+                <div class="view-grid">
+                    <div class="view-field full">
+                        <label>Program of Interest</label>
+                        <span id="viewLeadProgram">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Intake Year</label>
+                        <span id="viewLeadIntakeYear">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Intake Semester</label>
+                        <span id="viewLeadIntakeSem">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Education Level</label>
+                        <span id="viewLeadEducation">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>GPA/Percentage</label>
+                        <span id="viewLeadGpa">—</span>
+                    </div>
+                    <div class="view-field full">
+                        <label>Previous Institution</label>
+                        <span id="viewLeadInstitution">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Scholarship Interest</label>
+                        <span id="viewLeadScholarship">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Study Mode</label>
+                        <span id="viewLeadStudyMode">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="view-section">
+                <h4 class="view-section-title">
+                    <span class="section-icon">📋</span>
+                    Lead Details
+                </h4>
+                <div class="view-grid">
+                    <div class="view-field">
+                        <label>Source</label>
+                        <span id="viewLeadSource">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Status</label>
+                        <span id="viewLeadStatus">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Assigned Counselor</label>
+                        <span id="viewLeadCounselor">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Follow-up Date</label>
+                        <span id="viewLeadFollowup">—</span>
+                    </div>
+                    <div class="view-field full">
+                        <label>Notes</label>
+                        <span id="viewLeadNotes">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="view-section">
+                <h4 class="view-section-title">
+                    <span class="section-icon">📝</span>
+                    Enrollment Info
+                </h4>
+                <div class="view-grid">
+                    <div class="view-field">
+                        <label>Lead ID</label>
+                        <span id="viewLeadId">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Date Captured</label>
+                        <span id="viewLeadDateCaptured">—</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="lead-modal-actions" id="leadViewModalActions">
+        </div>
+    </div>
+</div>
+
+<!-- Edit Lead Modal -->
+<div class="lead-modal" id="leadEditModal" aria-hidden="true">
     <div class="lead-modal-backdrop" data-close="true"></div>
     <div class="lead-modal-card">
         <div class="lead-modal-head">
-            <h3 id="leadModalTitle">Lead Details</h3>
-            <button type="button" class="action-btn" id="leadModalClose" title="Close">x</button>
+            <h3 id="leadEditModalTitle">Edit Lead</h3>
+            <button type="button" class="action-btn" id="leadEditModalClose" title="Close">×</button>
         </div>
-        <form id="leadModalForm" class="lead-modal-form">
-            <input type="hidden" id="modalLeadId">
+        <form id="leadEditForm" class="lead-modal-form">
+            <input type="hidden" id="editLeadId">
             <div class="lead-modal-grid">
                 <label>
                     First Name
-                    <input type="text" id="modalFirstName" required>
+                    <input type="text" id="editFirstName" required>
                 </label>
                 <label>
                     Last Name
-                    <input type="text" id="modalLastName" required>
+                    <input type="text" id="editLastName" required>
                 </label>
                 <label>
                     Email
-                    <input type="email" id="modalEmail">
+                    <input type="email" id="editEmail">
                 </label>
                 <label>
                     Phone
-                    <input type="text" id="modalPhone">
+                    <input type="text" id="editPhone">
+                </label>
+                <label>
+                    Date of Birth
+                    <input type="date" id="editDateOfBirth">
+                </label>
+                <label>
+                    Gender
+                    <select id="editGender">
+                        <option value="">Select gender</option>
+                        {% for key, label in gender_choices %}
+                        <option value="{{ key }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label class="full">
+                    Address
+                    <input type="text" id="editAddress">
+                </label>
+                <label>
+                    Nationality
+                    <input type="text" id="editNationality">
+                </label>
+                <label>
+                    Alternate Contact
+                    <input type="text" id="editAlternateContact">
                 </label>
                 <label>
                     Program Interest
-                    <input type="text" id="modalProgramInterest">
+                    <select id="editProgramInterest">
+                        <option value="">Select a program</option>
+                        {% for program in program_choices %}
+                        <option value="{{ program.name }}">{{ program.name }} ({{ program.dept.name }})</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>
+                    Desired Intake Year
+                    <select id="editDesiredIntakeYear">
+                        <option value="">Select year</option>
+                        {% for year in intake_year_choices %}
+                        <option value="{{ year }}">{{ year }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>
+                    Intake Semester
+                    <select id="editIntakeSemester">
+                        <option value="">Select semester</option>
+                        {% for key, label in intake_semester_choices %}
+                        <option value="{{ key }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>
+                    Highest Education
+                    <select id="editHighestEducationLevel">
+                        <option value="">Select education level</option>
+                        {% for key, label in education_level_choices %}
+                        <option value="{{ key }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>
+                    GPA / Percentage
+                    <input type="text" id="editGpaOrPercentage">
+                </label>
+                <label class="full">
+                    Previous Institution
+                    <input type="text" id="editPreviousInstitution">
+                </label>
+                <label>
+                    Scholarship Interest
+                    <select id="editScholarshipInterest">
+                        <option value="">Select option</option>
+                        {% for key, label in scholarship_choices %}
+                        <option value="{{ key }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>
+                    Preferred Study Mode
+                    <select id="editPreferredStudyMode">
+                        <option value="">Select mode</option>
+                        {% for key, label in study_mode_choices %}
+                        <option value="{{ key }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
                 </label>
                 <label>
                     Status
-                    <select id="modalStatus">
+                    <select id="editStatus">
                         {% for key, label in status_choices %}
                         <option value="{{ key }}">{{ label }}</option>
                         {% endfor %}
@@ -167,18 +426,33 @@
                 </label>
                 <label>
                     Source
-                    <select id="modalSource">
-                        {% comment %}Source options are injected by JS for reuse across CRUD actions.{% endcomment %}
+                    <select id="editSource">
+                        {% for key, label in source_choices %}
+                        <option value="{{ key }}">{{ label }}</option>
+                        {% endfor %}
                     </select>
+                </label>
+                <label>
+                    Assigned Counselor
+                    <select id="editAssignedStaffId">
+                        <option value="">Select Counselor</option>
+                        {% for counselor in counselor_choices %}
+                        <option value="{{ counselor.staff_id }}">{{ counselor.full_name }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>
+                    Follow-up Date
+                    <input type="date" id="editFollowupDate">
                 </label>
                 <label class="full">
                     Notes
-                    <textarea id="modalNotes" rows="3"></textarea>
+                    <textarea id="editNotes" rows="3"></textarea>
                 </label>
             </div>
             <div class="lead-modal-actions">
-                <button type="button" class="btn-primary" id="leadModalEditBtn">Edit</button>
-                <button type="submit" class="btn-primary" id="leadModalSaveBtn" hidden>Save Changes</button>
+                <button type="button" class="btn-secondary" id="leadEditCancelBtn">Cancel</button>
+                <button type="submit" class="btn-primary">Save Changes</button>
             </div>
         </form>
     </div>
@@ -186,22 +460,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    window.leadCrudConfig = {
-        sourceChoices: [
-            { value: 'social_media', label: 'Social Media' },
-            { value: 'google_search', label: 'Google Search' },
-            { value: 'referral', label: 'Referral' },
-            { value: 'education_fair', label: 'Education Fair' },
-            { value: 'walk_in', label: 'Walk-In' },
-            { value: 'advertisement', label: 'Advertisement' },
-            { value: 'website', label: 'Website' },
-            { value: 'alumni', label: 'Alumni' },
-            { value: 'facebook', label: 'Facebook' },
-            { value: 'walkin', label: 'Walk-in' },
-            { value: 'other', label: 'Other' }
-        ]
-    };
-</script>
 <script src="{% static 'core/js/leads.js' %}"></script>
 {% endblock %}

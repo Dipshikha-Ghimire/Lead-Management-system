@@ -11,6 +11,26 @@ document.querySelectorAll('.tag-btn').forEach((btn) => {
     });
 });
 
+function getSelectedText(selectId) {
+    const selectEl = document.getElementById(selectId);
+    if (!selectEl || selectEl.selectedIndex < 0) return '';
+    return (selectEl.options[selectEl.selectedIndex]?.textContent || '').trim();
+}
+
+function getCheckedRadioLabel(groupName) {
+    const selected = document.querySelector(`input[name="${groupName}"]:checked`);
+    if (!selected) return '';
+    const label = selected.closest('label');
+    const labelText = (label?.textContent || '').trim();
+    return labelText || selected.value;
+}
+
+function getSelectedSourceLabel() {
+    const selectedTag = document.querySelector('.tag-btn.selected');
+    if (!selectedTag) return '';
+    return selectedTag.dataset.label || (selectedTag.textContent || '').trim() || selectedTag.dataset.val || '';
+}
+
 function validateStep(step) {
     let valid = true;
 
@@ -54,27 +74,35 @@ function validateStep(step) {
 }
 
 function populateReview() {
-    const mode = document.querySelector('input[name="mode"]:checked')?.value || '—';
-    const scholarship = document.querySelector('input[name="scholarship"]:checked')?.value || '—';
+    const mode = getCheckedRadioLabel('mode') || '—';
+    const scholarship = getCheckedRadioLabel('scholarship') || '—';
     const leadStatusEl = document.getElementById('leadStatus');
     const leadStatusValue = leadStatusEl?.value || '';
     const leadStatusLabel = leadStatusEl?.options?.[leadStatusEl.selectedIndex]?.textContent?.trim() || '';
     const leadStatus = leadStatusLabel || leadStatusValue.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase()) || '—';
+    const intakeYear = document.getElementById('intakeYear').value || '';
+    const intakeSemesterLabel = getSelectedText('intakeSem') || '—';
+    const intakeDisplay = intakeYear ? `${intakeYear} - ${intakeSemesterLabel}` : '—';
+    const genderDisplay = getSelectedText('gender') || '—';
+    const programDisplay = getSelectedText('program') || document.getElementById('program').value || '—';
+    const educationDisplay = getSelectedText('eduLevel') || '—';
+    const counselorDisplay = getSelectedText('counselor') || '—';
+    const sourceDisplay = getSelectedSourceLabel() || '—';
 
     const data = [
         { label: 'Full Name', value: `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`, full: false },
         { label: 'Email', value: document.getElementById('email').value, full: false },
         { label: 'Phone', value: document.getElementById('phone').value, full: false },
-        { label: 'Gender', value: document.getElementById('gender').value || '—', full: false },
-        { label: 'Program', value: document.getElementById('program').value, full: true },
-        { label: 'Intake', value: `${document.getElementById('intakeYear').value} – ${document.getElementById('intakeSem').value || '—'}`, full: false },
-        { label: 'Education', value: document.getElementById('eduLevel').value || '—', full: false },
+        { label: 'Gender', value: genderDisplay, full: false },
+        { label: 'Program', value: programDisplay, full: true },
+        { label: 'Intake', value: intakeDisplay, full: false },
+        { label: 'Education', value: educationDisplay, full: false },
         { label: 'GPA / %', value: document.getElementById('gpa').value || '—', full: false },
         { label: 'Scholarship Interest', value: scholarship, full: false },
         { label: 'Study Mode', value: mode, full: false },
-        { label: 'Lead Source', value: document.getElementById('leadSource').value || '—', full: false },
+        { label: 'Lead Source', value: sourceDisplay, full: false },
         { label: 'Lead Status', value: leadStatus, full: false },
-        { label: 'Counselor', value: document.getElementById('counselor').value || '—', full: false },
+        { label: 'Counselor', value: counselorDisplay, full: false },
         { label: 'Follow-up Date', value: document.getElementById('followupDate').value || '—', full: false },
         { label: 'Notes', value: document.getElementById('notes').value || '—', full: true },
     ];

@@ -1,39 +1,124 @@
 {% extends 'core/base.html' %}
 {% block title %}Settings{% endblock %}
 
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/settings.css' %}">
+{% endblock %}
+
 {% block content %}
-<section class="page-head">
-	<h1>Settings</h1>
-	<p>Manage account details, alerts, and platform preferences.</p>
+
+<section class="page-header">
+    <div class="page-header-content">
+        <h1>Settings</h1>
+        <p>Manage your account preferences</p>
+    </div>
 </section>
 
-<div class="split-grid">
-	<article class="card">
-		<div class="section-head">
-			<h3>Profile</h3>
-			<span>Update your personal details</span>
-		</div>
-		<ul class="status-list">
-			<li><span>Full Name</span><strong>Admin User</strong></li>
-			<li><span>Email</span><strong>admin@ku.edu.np</strong></li>
-			<li><span>Role</span><strong>Administrator</strong></li>
-		</ul>
-	</article>
-
-	<article class="card">
-		<div class="section-head">
-			<h3>Preferences</h3>
-			<span>Notification and security controls</span>
-		</div>
-		<ul class="status-list">
-			<li><span>Email Alerts</span><strong>Enabled</strong></li>
-			<li><span>SMS Alerts</span><strong>Disabled</strong></li>
-			<li><span>Two-factor Authentication</span><strong>Enabled</strong></li>
-		</ul>
-		<form method="post" action="{% url 'logout' %}" class="settings-logout-form">
-			{% csrf_token %}
-			<button class="btn-logout" type="submit">Logout</button>
-		</form>
-	</article>
+{% if messages %}
+<div class="messages-container">
+    {% for message in messages %}
+    <div class="message {{ message.tags }}">{{ message }}</div>
+    {% endfor %}
 </div>
+{% endif %}
+
+<div class="settings-grid">
+    <!-- Account Info Card -->
+    <div class="settings-card account-card">
+        <div class="card-header">
+            <div class="card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+            </div>
+            <div class="card-title">
+                <h2>Account Information</h2>
+                <p>Your profile details</p>
+            </div>
+        </div>
+        <div class="card-content">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Full Name</span>
+                    <span class="info-value">{{ request.user.get_full_name|default:request.user.username }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Email Address</span>
+                    <span class="info-value">{{ request.user.email }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Role</span>
+                    <span class="info-value role-badge">{{ staff.get_role_display|default:"System User" }}</span>
+                </div>
+            </div>
+            <div class="card-action">
+                <a href="{% url 'profile' %}" class="btn-secondary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Edit Profile
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="settings-right">
+        <!-- Change Password Card -->
+        <div class="settings-card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                </div>
+                <div class="card-title">
+                    <h2>Change Password</h2>
+                    <p>Update your account password</p>
+                </div>
+            </div>
+            <div class="card-content">
+                <form method="post" action="{% url 'password_change' %}" class="password-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_old_password">Current Password</label>
+                        <input type="password" name="old_password" id="id_old_password" placeholder="Enter current password" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_new_password1">New Password</label>
+                            <input type="password" name="new_password1" id="id_new_password1" placeholder="Enter new password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="id_new_password2">Confirm Password</label>
+                            <input type="password" name="new_password2" id="id_new_password2" placeholder="Confirm new password" required>
+                        </div>
+                    </div>
+                    <div class="form-action">
+                        <button type="submit" class="btn-primary">Update Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Small Logout Button -->
+        <form method="post" action="{% url 'logout' %}" class="logout-form">
+            {% csrf_token %}
+            <button type="submit" class="btn-logout-small">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Logout
+            </button>
+        </form>
+    </div>
+</div>
+
 {% endblock %}

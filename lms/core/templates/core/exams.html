@@ -10,18 +10,18 @@
 <div class="cards cards-3">
 	<article class="card metric-card">
 		<h3>Upcoming Sessions</h3>
-		<p>8</p>
-		<small>Next exam in 3 days</small>
+		<p>{{ upcoming_count }}</p>
+		<small>Scheduled exams</small>
 	</article>
 	<article class="card metric-card">
 		<h3>Registered Students</h3>
-		<p>742</p>
-		<small>+9.8% from last cycle</small>
+		<p>{{ registered_count }}</p>
+		<small>Total applicants</small>
 	</article>
 	<article class="card metric-card">
 		<h3>Pass Rate</h3>
-		<p>61%</p>
-		<small>Preliminary score band</small>
+		<p>{{ pass_rate }}%</p>
+		<small>Of graded exams</small>
 	</article>
 </div>
 
@@ -29,16 +29,27 @@
 	<table class="table">
 		<thead>
 			<tr>
-				<th>Exam</th>
+				<th>Exam for Program</th>
+				<th>Student</th>
 				<th>Date</th>
-				<th>Venue</th>
-				<th>Registered</th>
+				<th>Type</th>
+				<th>Status</th>
 			</tr>
 		</thead>
 		<tbody>
-			<tr><td>Engineering Entrance</td><td>2025-03-06</td><td>KU Main Hall</td><td>210</td></tr>
-			<tr><td>BBA Aptitude Test</td><td>2025-03-08</td><td>Block C</td><td>165</td></tr>
-			<tr><td>Science Assessment</td><td>2025-03-10</td><td>Block A</td><td>192</td></tr>
+			{% for session in exam_sessions %}
+			<tr>
+				<td>{{ session.application.program.name }}</td>
+				<td>{{ session.application.lead.first_name }} {{ session.application.lead.last_name }}</td>
+				<td>{{ session.exam_date|date:"Y-m-d H:i" }}</td>
+				<td>{{ session.get_type_display }}</td>
+				<td>{{ session.get_result_status_display|default:"Pending" }}</td>
+			</tr>
+			{% empty %}
+			<tr>
+				<td colspan="5" style="text-align: center;">No exams scheduled.</td>
+			</tr>
+			{% endfor %}
 		</tbody>
 	</table>
 </article>

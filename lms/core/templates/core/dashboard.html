@@ -1,73 +1,131 @@
 {% extends 'core/base.html' %}
+{% load static %}
 {% block title %}Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
 
 {% block content %}
 <section class="hero-card">
     <h1>Welcome back, {{ request.user.username }}</h1>
-    <p>Admission season is active. You have {{ pending_applications }} new applications to review and {{ pending_scholarships }} scholarship requests pending decision.</p>
+    <p>You have <strong>{{ pending_applications }}</strong> new applications to review and <strong>{{ pending_scholarships }}</strong> scholarship requests pending.</p>
     <div class="hero-actions">
-        <button class="btn-primary" type="button">View Pending Tasks</button>
-        <button class="btn-secondary" type="button">Generate Report</button>
-        <form method="post" action="{% url 'logout' %}" class="inline-form">
-            {% csrf_token %}
-            <button class="btn-logout" type="submit">Logout</button>
-        </form>
+        <a href="{% url 'applications' %}" class="btn-primary">View Applications</a>
+        <a href="{% url 'leads' %}" class="btn-secondary">View All Leads</a>
     </div>
 </section>
 
-<div class="cards">
-    <article class="card metric-card">
-        <h3>Total Leads</h3>
-        <p>{{ total_leads }}</p>
-        <small>Total</small>
-    </article>
-    <article class="card metric-card">
-        <h3>Qualified</h3>
-        <p>{{ qualified_leads }}</p>
-        <small>Leads with Qualified status</small>
-    </article>
-    <article class="card metric-card">
-        <h3>Enrolled</h3>
-        <p>{{ enrolled_count }}</p>
-        <small>Accepted applications</small>
-    </article>
-    <article class="card metric-card">
-        <h3>Revenue</h3>
-        <p>NPR {{ verified_revenue }}</p>
-        <small>Verified payments only</small>
-    </article>
+<!-- Stats Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon leads-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+        </div>
+        <div class="stat-content">
+            <span class="stat-label">Total Leads</span>
+            <span class="stat-value">{{ total_leads }}</span>
+            <span class="stat-growth positive">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                </svg>
+                +{{ leads_growth }}% from last month
+            </span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon qualified-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+        </div>
+        <div class="stat-content">
+            <span class="stat-label">Qualified</span>
+            <span class="stat-value">{{ qualified_leads }}</span>
+            <span class="stat-growth positive">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                </svg>
+                +{{ qualified_growth }}% from last month
+            </span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon enrolled-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+            </svg>
+        </div>
+        <div class="stat-content">
+            <span class="stat-label">Enrolled</span>
+            <span class="stat-value">{{ enrolled_count }}</span>
+            <span class="stat-growth positive">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                </svg>
+                +{{ enrolled_growth }}% from last month
+            </span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon revenue-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="1" x2="12" y2="23"/>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+        </div>
+        <div class="stat-content">
+            <span class="stat-label">Revenue</span>
+            <span class="stat-value">NPR {{ verified_revenue|floatformat:0 }}</span>
+            <span class="stat-growth {% if revenue_growth >= 0 %}positive{% else %}negative{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                    {% if revenue_growth >= 0 %}
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                    {% else %}
+                    <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/>
+                    {% endif %}
+                </svg>
+                {% if revenue_growth >= 0 %}+{% endif %}{{ revenue_growth }}% from last month
+            </span>
+        </div>
+    </div>
 </div>
 
-<div class="split-grid">
-    <article class="card">
-        <div class="section-head">
+<!-- Charts Grid -->
+<div class="charts-grid">
+    <div class="chart-card">
+        <div class="chart-header">
             <h3>Admission Funnel</h3>
-            <span>Lead conversion rates across stages</span>
+            <span>Lead conversion across stages</span>
         </div>
-        <ul class="status-list">
-            <li><span>Capture</span><strong>{{ funnel_capture }}</strong></li>
-            <li><span>Qualification</span><strong>{{ funnel_qualification }}</strong></li>
-            <li><span>Review</span><strong>{{ funnel_review }}</strong></li>
-            <li><span>Exam</span><strong>{{ funnel_exam }}</strong></li>
-            <li><span>Enrolled</span><strong>{{ funnel_enrolled }}</strong></li>
-        </ul>
-    </article>
+        <div class="chart-container">
+            <canvas id="funnelChart"></canvas>
+        </div>
+    </div>
 
-    <article class="card">
-        <div class="section-head">
+    <div class="chart-card">
+        <div class="chart-header">
             <h3>Lead Sources</h3>
-            <span>Where are students coming from?</span>
+            <span>Where students come from</span>
         </div>
-        <ul class="source-list">
-            {% for source in source_totals %}
-            <li><span>{{ source.label }}</span><strong>{{ source.percent }}%</strong></li>
-            {% empty %}
-            <li><span>No data yet</span><strong>0%</strong></li>
-            {% endfor %}
-        </ul>
-    </article>
+        <div class="chart-container pie-container">
+            <canvas id="sourceChart"></canvas>
+        </div>
+    </div>
 </div>
 
+<!-- Recent Leads -->
 <article class="card recent-card">
     <div class="section-head">
         <h3>Recent Leads</h3>
@@ -78,16 +136,18 @@
             <tr>
                 <th>Name</th>
                 <th>Program</th>
-                <th>Stage</th>
+                <th>Status</th>
                 <th>Date</th>
             </tr>
         </thead>
         <tbody>
             {% for lead in recent_leads %}
             <tr>
-                <td>{{ lead.name }}</td>
+                <td>
+                    <div class="lead-name-cell">{{ lead.name }}</div>
+                </td>
                 <td>{{ lead.program }}</td>
-                <td>{{ lead.stage }}</td>
+                <td><span class="status-badge status-{{ lead.stage|lower }}">{{ lead.stage }}</span></td>
                 <td>{{ lead.date|date:"Y-m-d" }}</td>
             </tr>
             {% empty %}
@@ -98,4 +158,103 @@
         </tbody>
     </table>
 </article>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Funnel Bar Chart
+    const funnelCtx = document.getElementById('funnelChart').getContext('2d');
+    new Chart(funnelCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Capture', 'Qualified', 'Review', 'Exam', 'Enrolled'],
+            datasets: [{
+                label: 'Leads',
+                data: [
+                    {{ funnel_capture }},
+                    {{ funnel_qualification }},
+                    {{ funnel_review }},
+                    {{ funnel_exam }},
+                    {{ funnel_enrolled }}
+                ],
+                backgroundColor: [
+                    '#3b82f6',
+                    '#8b5cf6',
+                    '#f59e0b',
+                    '#06b6d4',
+                    '#10b981'
+                ],
+                borderRadius: 8,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: '#f1f5f9'
+                    },
+                    ticks: {
+                        stepSize: 1
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Source Pie Chart
+    const sourceData = {{ source_totals_json|safe }};
+    const sourceCtx = document.getElementById('sourceChart').getContext('2d');
+    new Chart(sourceCtx, {
+        type: 'doughnut',
+        data: {
+            labels: sourceData.map(s => s.label),
+            datasets: [{
+                data: sourceData.map(s => s.count),
+                backgroundColor: [
+                    '#3b82f6',
+                    '#10b981',
+                    '#f59e0b',
+                    '#ef4444',
+                    '#8b5cf6',
+                    '#06b6d4',
+                    '#ec4899',
+                    '#6366f1'
+                ],
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 15,
+                        font: {
+                            size: 12
+                        }
+                    }
+                }
+            },
+            cutout: '65%'
+        }
+    });
+});
+</script>
 {% endblock %}

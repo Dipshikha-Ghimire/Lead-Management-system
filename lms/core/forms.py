@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 import re
 
 
+
 class LoginForm(forms.Form):
     username = forms.CharField(
         max_length=150,

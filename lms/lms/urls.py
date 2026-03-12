@@ -23,8 +23,20 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+from django.contrib.auth import views as auth_views
+from django.views.generic import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('core.urls')), # This connects to your app
+    path('', include('core.urls')),
+    path('accounts/login/', RedirectView.as_view(pattern_name='login', permanent=False), name='accounts_login_redirect'),
+    path('accounts/password_reset/', RedirectView.as_view(pattern_name='password_reset', permanent=False), name='accounts_password_reset_redirect'),
+    path('accounts/password_reset/done/', RedirectView.as_view(pattern_name='password_reset_done', permanent=False), name='accounts_password_reset_done_redirect'),
+    path('accounts/password_change/', auth_views.PasswordChangeView.as_view(), name='password_change'),
+    path('accounts/password_change/done/', auth_views.PasswordChangeDoneView.as_view(), name='password_change_done'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
