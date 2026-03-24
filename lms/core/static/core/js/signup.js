@@ -9,50 +9,81 @@ window.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    signupForm.addEventListener('submit', (event) => {
-        clearClientError();
+    signupForm.addEventListener('submit', (e) => {
+        clearErrors();
+        let hasError = false;
 
-        const username = usernameInput.value.trim();
-        const email = emailInput.value.trim();
-        const password1 = password1Input.value;
-        const password2 = password2Input.value;
-
-        if (!username) {
-            event.preventDefault();
-            showClientError('Please enter your username.');
-            return;
+        if (!usernameInput.value.trim()) {
+            showFieldError(usernameInput, 'Username is required.');
+            hasError = true;
         }
 
-        if (!email) {
-            event.preventDefault();
-            showClientError('Please enter your email address.');
-            return;
+        if (!emailInput.value.trim()) {
+            showFieldError(emailInput, 'Email is required.');
+            hasError = true;
+        } else if (!isValidEmail(emailInput.value.trim())) {
+            showFieldError(emailInput, 'Please enter a valid email address.');
+            hasError = true;
         }
 
-        if (password1.length < 8) {
-            event.preventDefault();
-            showClientError('Password must be at least 8 characters long.');
-            return;
+        if (!password1Input.value) {
+            showFieldError(password1Input, 'Password is required.');
+            hasError = true;
+        } else if (password1Input.value.length < 8) {
+            showFieldError(password1Input, 'Password must be at least 8 characters long.');
+            hasError = true;
         }
 
-        if (password1 !== password2) {
-            event.preventDefault();
-            showClientError('Passwords do not match.');
+        if (!password2Input.value) {
+            showFieldError(password2Input, 'Please confirm your password.');
+            hasError = true;
+        } else if (password1Input.value !== password2Input.value) {
+            showFieldError(password2Input, 'Passwords do not match.');
+            hasError = true;
         }
+
+        if (hasError) {
+            e.preventDefault();
+        }
+    });
+
+    [usernameInput, emailInput, password1Input, password2Input].forEach(input => {
+        input.addEventListener('input', () => {
+            clearFieldError(input);
+        });
     });
 });
 
-function showClientError(message) {
-    const form = document.getElementById('signupForm');
-    const errorBlock = document.createElement('div');
-    errorBlock.className = 'field-errors client-error';
-    errorBlock.innerHTML = `<small class="error-text">${message}</small>`;
-    form.insertBefore(errorBlock, form.querySelector('.btn-submit'));
+function showFieldError(input, message) {
+    const inputGroup = input.closest('.input-group');
+    if (inputGroup) {
+        let errorDiv = inputGroup.querySelector('.field-errors');
+        if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.className = 'field-errors';
+            inputGroup.appendChild(errorDiv);
+        }
+        errorDiv.innerHTML = `<small class="error-text">${message}</small>`;
+        input.classList.add('error');
+    }
 }
 
-function clearClientError() {
-    const existing = document.querySelector('.client-error');
-    if (existing) {
-        existing.remove();
+function clearErrors() {
+    document.querySelectorAll('.input-group .field-errors').forEach(el => el.remove());
+    document.querySelectorAll('.input-group input.error').forEach(el => el.classList.remove('error'));
+}
+
+function clearFieldError(input) {
+    const inputGroup = input.closest('.input-group');
+    if (inputGroup) {
+        const errorDiv = inputGroup.querySelector('.field-errors');
+        if (errorDiv) {
+            errorDiv.remove();
+        }
+        input.classList.remove('error');
     }
+}
+
+function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }

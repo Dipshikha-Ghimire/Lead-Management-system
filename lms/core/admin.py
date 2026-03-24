@@ -3,7 +3,7 @@ from django.db.models import Sum
 from django.utils import timezone
 from django.utils.html import format_html
 from .models import (
-    Department, Program, Staff, Lead, FollowUp,
+    Department, Program, Staff, Admin, Lead, FollowUp,
     Application, EntranceExam, Scholarship, Payment
 )
 
@@ -66,9 +66,20 @@ class ProgramAdmin(admin.ModelAdmin):
 
 @admin.register(Staff)
 class StaffAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'email', 'role')
+    list_display = ('full_name', 'email', 'role', 'department')
     search_fields = ('full_name', 'email')
     ordering = ('full_name',)
+    list_filter = ('role', 'department')
+    autocomplete_fields = ('user', 'department')
+
+
+@admin.register(Admin)
+class AdminAdmin(admin.ModelAdmin):
+    list_display = ('full_name', 'email', 'role', 'department', 'designation')
+    search_fields = ('full_name', 'email')
+    ordering = ('full_name',)
+    list_filter = ('role', 'department')
+    autocomplete_fields = ('user', 'department')
 
 
 @admin.register(Lead)
@@ -104,11 +115,10 @@ class LeadAdmin(admin.ModelAdmin):
         ('Academic', {
             'fields': (
                 'program_interest',
-                'desired_intake_year',
-                'intake_semester',
                 'highest_education_level',
                 'gpa_or_percentage',
                 'previous_institution',
+                'education_document',
                 'scholarship_interest',
                 'preferred_study_mode',
             )

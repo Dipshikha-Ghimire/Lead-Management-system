@@ -52,6 +52,7 @@
 
     function populateViewModalFromButton(btn) {
         const appId = btn.dataset.id;
+        const statusLabel = btn.dataset.status || (currentTab ? currentTab.charAt(0).toUpperCase() + currentTab.slice(1) : 'Pending');
         
         document.getElementById('viewFullName').textContent = btn.dataset.applicant || '—';
         document.getElementById('viewEmail').textContent = btn.dataset.email || '—';
@@ -63,11 +64,19 @@
         document.getElementById('viewAltContact').textContent = btn.dataset.altContact || '—';
         
         document.getElementById('viewProgram').textContent = btn.dataset.program || '—';
-        document.getElementById('viewIntakeYear').textContent = btn.dataset.intakeYear || '—';
-        document.getElementById('viewIntakeSem').textContent = btn.dataset.intakeSem || '—';
         document.getElementById('viewEducation').textContent = btn.dataset.education || '—';
         document.getElementById('viewGpa').textContent = btn.dataset.gpa || '—';
         document.getElementById('viewInstitution').textContent = btn.dataset.institution || '—';
+        
+        const eduDocLink = document.getElementById('viewEduDocLink');
+        const eduDocUrl = btn.dataset.eduDoc;
+        if (eduDocUrl) {
+            eduDocLink.href = eduDocUrl;
+            eduDocLink.style.display = 'inline';
+        } else {
+            eduDocLink.style.display = 'none';
+        }
+        
         document.getElementById('viewScholarship').textContent = btn.dataset.scholarship || '—';
         document.getElementById('viewStudyMode').textContent = btn.dataset.studyMode || '—';
         
@@ -79,13 +88,13 @@
         
         document.getElementById('viewAppId').textContent = `A${String(appId).padStart(4, '0')}`;
         document.getElementById('viewSubmitted').textContent = btn.dataset.submitted || '—';
-        document.getElementById('viewStatus').textContent = 'Pending';
+        document.getElementById('viewStatus').textContent = statusLabel;
         
         document.getElementById('viewModalTitle').textContent = 
             `Application #${String(appId).padStart(4, '0')}`;
         
         // Show actions based on current tab
-        updateModalActions(appId, 'pending');
+        updateModalActions(appId, currentTab);
     }
 
     function updateModalActions(appId, status) {

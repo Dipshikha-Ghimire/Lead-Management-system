@@ -8,6 +8,7 @@
 {% endblock %}
 
 {% block content %}
+<input type="hidden" id="csrfToken" value="{{ csrf_token }}">
 
 <section class="page-header">
     <div class="page-header-content">
@@ -15,14 +16,6 @@
         <p>Manage your account preferences</p>
     </div>
 </section>
-
-{% if messages %}
-<div class="messages-container">
-    {% for message in messages %}
-    <div class="message {{ message.tags }}">{{ message }}</div>
-    {% endfor %}
-</div>
-{% endif %}
 
 <div class="settings-grid">
     <!-- Account Info Card -->
@@ -83,24 +76,25 @@
                 </div>
             </div>
             <div class="card-content">
-                <form method="post" action="{% url 'password_change' %}" class="password-form">
-                    {% csrf_token %}
+                <form id="passwordForm" class="password-form">
+                    <div id="formMessage" class="form-message" style="display: none;"></div>
                     <div class="form-group">
                         <label for="id_old_password">Current Password</label>
-                        <input type="password" name="old_password" id="id_old_password" placeholder="Enter current password" required>
+                        <input type="password" name="old_password" id="id_old_password" placeholder="Enter current password">
                     </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="id_new_password1">New Password</label>
-                            <input type="password" name="new_password1" id="id_new_password1" placeholder="Enter new password" required>
+                            <input type="password" name="new_password1" id="id_new_password1" placeholder="Enter new password">
+                            <small class="form-hint">At least 8 characters</small>
                         </div>
                         <div class="form-group">
                             <label for="id_new_password2">Confirm Password</label>
-                            <input type="password" name="new_password2" id="id_new_password2" placeholder="Confirm new password" required>
+                            <input type="password" name="new_password2" id="id_new_password2" placeholder="Confirm new password">
                         </div>
                     </div>
                     <div class="form-action">
-                        <button type="submit" class="btn-primary">Update Password</button>
+                        <button type="submit" class="btn-primary" id="passwordSubmitBtn">Update Password</button>
                     </div>
                 </form>
             </div>
@@ -120,5 +114,84 @@
         </form>
     </div>
 </div>
+
+<script>
+(function() {
+    const form = document.getElementById('passwordForm');
+    const formMessage = document.getElementById('formMessage');
+    const submitBtn = document.getElementById('passwordSubmitBtn');
+    const csrfToken = document.getElementById('csrfToken')?.value || '';
+
+    function showMessage(message, isError) {
+        formMessage.textContent = message;
+        formMessage.className = 'form-message ' + (isError ? 'error' : 'success');
+        formMessage.style.display = 'block';
+    }
+
+    function clearMessage() {
+        formMessage.style.display = 'none';
+    }
+
+    form?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        clearMessage();
+        
+        const oldPassword = document.getElementById('id_old_password').value;
+        const newPassword1 = document.getElementById('id_new_password1').value;
+        const newPassword2 = document.getElementById('id_new_password2').value;
+        
+        if (!oldPassword) {
+            showMessage('Please enter your current password.', true);
+            return;
+        }
+        if (!newPassword1 || !newPassword2) {
+            showMessage('Please fill in both new password fields.', true);
+            return;
+        }
+        if (newPassword1.length < 8) {
+            showMessage('New password must be at least 8 characters.', true);
+            return;
+        }
+        if (newPassword1 !== newPassword2) {
+            showMessage('New passwords do not match.', true);
+            return;
+        }
+        
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Updating...';
+        
+        const formData = new FormData();
+        formData.append('old_password', oldPassword);
+        formData.append('new_password1', newPassword1);
+        formData.append('new_password2', newPassword2);
+        
+        fetch('{% url "change_password_api" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showMessage('Password changed successfully!', false);
+                form.reset();
+            } else {
+                const errorMsg = (data.errors && data.errors.length > 0) ? data.errors[0] : (data.error || 'Failed to change password.');
+                showMessage(errorMsg, true);
+            }
+        })
+        .catch(error => {
+            showMessage('An error occurred. Please try again.', true);
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Update Password';
+        });
+    });
+})();
+</script>
 
 {% endblock %}

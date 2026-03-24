@@ -15,6 +15,7 @@
             <h1>Enrolled Students</h1>
             <p>View and manage approved student enrollments.</p>
         </div>
+        {% if is_admin_user %}
         <a href="{% url 'lead_form' %}" class="btn-primary add-lead-btn">
             <svg class="add-lead-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                 viewBox="0 0 16 16">
@@ -23,6 +24,7 @@
             </svg>
             Add New Lead
         </a>
+        {% endif %}
     </div>
 </section>
 
@@ -98,18 +100,23 @@
                                 data-address="{{ lead.address }}"
                                 data-nationality="{{ lead.nationality }}"
                                 data-alt-contact="{{ lead.alternate_contact }}"
-                                data-intake-year="{{ lead.desired_intake_year }}"
-                                data-intake-sem="{{ lead.intake_semester }}"
                                 data-education="{{ lead.highest_education_level }}"
                                 data-gpa="{{ lead.gpa_or_percentage }}"
                                 data-institution="{{ lead.previous_institution }}"
+                                data-edu-doc="{{ lead.education_document }}"
                                 data-scholarship="{{ lead.scholarship_interest }}"
                                 data-study-mode="{{ lead.preferred_study_mode }}"
                                 data-source="{{ lead.source }}"
                                 data-lead-status="{{ lead.lead_status }}"
                                 data-counselor="{{ lead.assigned_counselor }}"
                                 data-followup="{{ lead.followup_date }}"
-                                data-notes="{{ lead.notes }}">
+                                data-notes="{{ lead.notes }}"
+                                data-exam-score="{{ lead.exam_score }}"
+                                data-exam-result="{{ lead.exam_result }}"
+                                data-scholarship-percentage="{{ lead.scholarship_percentage }}"
+                                data-scholarship-approved="{{ lead.scholarship_approved|yesno:'true,false' }}"
+                                data-final-course-fee="{{ lead.final_course_fee }}"
+                                data-enrollment-note="{{ lead.enrollment_note }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -131,6 +138,7 @@
                                 </svg>
                                 Edit
                             </button>
+                            {% if is_admin_user %}
                             <button class="action-btn delete-btn lead-delete-btn" title="Delete" data-id="{{ lead.id }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                     viewBox="0 0 16 16">
@@ -141,6 +149,7 @@
                                 </svg>
                                 Delete
                             </button>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>
@@ -221,14 +230,6 @@
                         <span id="viewLeadProgram">—</span>
                     </div>
                     <div class="view-field">
-                        <label>Intake Year</label>
-                        <span id="viewLeadIntakeYear">—</span>
-                    </div>
-                    <div class="view-field">
-                        <label>Intake Semester</label>
-                        <span id="viewLeadIntakeSem">—</span>
-                    </div>
-                    <div class="view-field">
                         <label>Education Level</label>
                         <span id="viewLeadEducation">—</span>
                     </div>
@@ -239,6 +240,10 @@
                     <div class="view-field full">
                         <label>Previous Institution</label>
                         <span id="viewLeadInstitution">—</span>
+                    </div>
+                    <div class="view-field full">
+                        <label>Education Document</label>
+                        <span id="viewLeadEduDoc"><a href="#" id="viewLeadEduDocLink" target="_blank" style="color: #0f766e; text-decoration: underline;">View Document</a></span>
                     </div>
                     <div class="view-field">
                         <label>Scholarship Interest</label>
@@ -293,6 +298,22 @@
                     <div class="view-field">
                         <label>Date Captured</label>
                         <span id="viewLeadDateCaptured">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Exam Result</label>
+                        <span id="viewLeadExamResult">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Exam Score</label>
+                        <span id="viewLeadExamScore">—</span>
+                    </div>
+                    <div class="view-field">
+                        <label>Final Course Fee</label>
+                        <span id="viewLeadFinalCourseFee">—</span>
+                    </div>
+                    <div class="view-field full">
+                        <label>Enrollment Note</label>
+                        <span id="viewLeadEnrollmentNote">—</span>
                     </div>
                 </div>
             </div>
@@ -373,15 +394,6 @@
                     </select>
                 </label>
                 <label>
-                    Intake Semester
-                    <select id="editIntakeSemester">
-                        <option value="">Select semester</option>
-                        {% for key, label in intake_semester_choices %}
-                        <option value="{{ key }}">{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </label>
-                <label>
                     Highest Education
                     <select id="editHighestEducationLevel">
                         <option value="">Select education level</option>
@@ -397,6 +409,11 @@
                 <label class="full">
                     Previous Institution
                     <input type="text" id="editPreviousInstitution">
+                </label>
+                <label class="full">
+                    Education Document
+                    <input type="file" id="editEducationDocument" accept=".pdf,.jpg,.jpeg,.png">
+                    <small id="currentEduDoc" style="color: #64748b; font-weight: normal;"></small>
                 </label>
                 <label>
                     Scholarship Interest

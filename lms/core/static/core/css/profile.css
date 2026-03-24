@@ -137,6 +137,10 @@
     min-height: 80px;
 }
 
+.form-group.full-width {
+    grid-column: span 2;
+}
+
 .form-group input[readonly],
 .form-group textarea[readonly] {
     background: #f8fafc;
@@ -148,6 +152,42 @@
 .form-group textarea[readonly]:focus {
     border-color: #e2e8f0;
     box-shadow: none;
+}
+
+.form-group select {
+    border: 1px solid #d5deef;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 14px;
+    line-height: 1.4;
+    min-height: 48px;
+    color: #0f172a;
+    background: #f8fafc;
+    cursor: not-allowed;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-group select:enabled {
+    background: #fff;
+    cursor: pointer;
+}
+
+#personalInfoForm[data-can-edit-department="false"] .form-group select {
+    min-height: 48px;
+}
+
+.profile-note {
+    margin-top: 16px;
+    padding: 10px 14px;
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    border-radius: 8px;
+    color: #92400e;
+}
+
+.profile-note small {
+    font-size: 12px;
 }
 
 .btn-save {

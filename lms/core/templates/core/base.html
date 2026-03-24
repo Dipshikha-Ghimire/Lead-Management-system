@@ -45,10 +45,12 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="6" x2="12" y2="10"/><line x1="12" y1="14" x2="12" y2="14"/></svg>
                     Exams
                 </a>
+                {% if not is_staff_user %}
                 <a href="{% url 'courses' %}" class="{% if request.path == '/courses/' %}active{% endif %}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
                     Courses
                 </a>
+                {% endif %}
                 <a href="{% url 'profile' %}" class="{% if request.path == '/profile/' %}active{% endif %}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     Profile
@@ -105,10 +107,7 @@
                     </div>
                     <div class="user-dropdown-wrapper">
                         <button class="top-icon user-dropdown-btn" id="userDropdownBtn" title="Menu">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-                                <circle cx="12" cy="12" r="3"/>
-                                <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
-                            </svg>
+                            <div class="topbar-avatar">{{ sidebar_profile.name.0|default:'U'|upper }}</div>
                         </button>
                         <div class="user-dropdown" id="userDropdown">
                             <div class="user-dropdown-header">
@@ -150,6 +149,13 @@
             </header>
 
             <section class="page">
+                {% if messages %}
+                <div class="flash-messages" role="status" aria-live="polite">
+                    {% for message in messages %}
+                    <div class="flash-message flash-{{ message.tags|default:'info' }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
                 {% block content %}{% endblock %}
             </section>
 
@@ -182,6 +188,13 @@
     if (menuToggle) menuToggle.addEventListener('click', openSidebar);
     if (sidebarClose) sidebarClose.addEventListener('click', closeSidebar);
     if (backdrop) backdrop.addEventListener('click', closeSidebar);
+
+    // Keep sidebar/backdrop state consistent after viewport changes.
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 1024) {
+            closeSidebar();
+        }
+    });
 
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && sidebar && sidebar.classList.contains('open')) {

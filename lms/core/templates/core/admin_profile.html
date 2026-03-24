@@ -1,0 +1,49 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Admin Profile{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<section class="profile-hero">
+    <h1>Admin Profile</h1>
+    <p>View and manage your profile information.</p>
+</section>
+
+<div class="profile-layout">
+    <div class="profile-card">
+        <div class="card-header">
+            <h2>Personal Information</h2>
+            <button type="button" class="btn-edit" id="editPersonalBtn">Edit</button>
+        </div>
+        <form method="post" class="profile-form" id="personalInfoForm">
+            {% csrf_token %}
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" name="first_name" value="{{ user.first_name|default:'' }}" placeholder="Your first name" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" name="last_name" value="{{ user.last_name|default:'' }}" placeholder="Your last name" readonly>
+                </div>
+                <div class="form-group full">
+                    <label>Email Address</label>
+                    <input type="email" name="email" value="{{ user.email|default:'' }}" placeholder="your.email@example.com" readonly>
+                </div>
+            </div>
+            <div class="form-actions edit-actions" style="display: none;">
+                <button type="button" class="btn-cancel" id="cancelPersonalBtn">Cancel</button>
+                <button type="submit" class="btn-save">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'core/js/profile.js' %}"></script>
+{% endblock %}

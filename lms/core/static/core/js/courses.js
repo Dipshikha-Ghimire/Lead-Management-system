@@ -18,17 +18,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
                 },
                 body: formData
             }).then(function(response) {
                 return response.json();
             }).then(function(data) {
                 if (data.success) {
+                    // Close the modal
+                    const modal = document.getElementById('deptModal');
+                    if (modal) {
+                        modal.style.display = 'none';
+                    }
+                    // Reset form
+                    deptForm.reset();
+                    document.getElementById('editDeptId').value = '';
+                    document.getElementById('deptModalTitle').textContent = 'Add Department';
+                    // Reload to show updated list (could implement real-time DOM update here)
                     location.reload();
                 } else {
                     alert(data.error || 'An error occurred');
                 }
-            }).catch(function() {
+            }).catch(function(err) {
+                console.error('Error:', err);
                 alert('An error occurred. Please try again.');
             });
         });
@@ -50,17 +62,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
                 },
                 body: formData
             }).then(function(response) {
                 return response.json();
             }).then(function(data) {
                 if (data.success) {
+                    // Close the modal
+                    const modal = document.getElementById('progModal');
+                    if (modal) {
+                        modal.style.display = 'none';
+                    }
+                    // Reset form
+                    progForm.reset();
+                    document.getElementById('editProgId').value = '';
+                    document.getElementById('progModalTitle').textContent = 'Add Program';
+                    // Reload to show updated list (could implement real-time DOM update here)
                     location.reload();
                 } else {
                     alert(data.error || 'An error occurred');
                 }
-            }).catch(function() {
+            }).catch(function(err) {
+                console.error('Error:', err);
                 alert('An error occurred. Please try again.');
             });
         });

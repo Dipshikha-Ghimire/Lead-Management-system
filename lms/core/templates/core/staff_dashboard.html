@@ -1,0 +1,52 @@
+{% extends 'core/staff_base.html' %}
+{% load static %}
+{% block title %}Staff Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="hero-card">
+    <h1>Welcome back, {{ request.user.username }}</h1>
+    <p>{% if staff_department %}Managing leads for {{ staff_department }}{% else %}View and manage leads, applications, and exams.{% endif %}</p>
+    <div class="hero-actions">
+        <a href="{% url 'applications' %}" class="btn-primary">View Applications</a>
+        <a href="{% url 'leads' %}" class="btn-secondary">View All Leads</a>
+    </div>
+</section>
+
+<!-- Recent Leads -->
+<article class="card recent-card">
+    <div class="section-head">
+        <h3>Recent Leads</h3>
+        <a href="{% url 'leads' %}">View All</a>
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Program</th>
+                <th>Status</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lead in recent_leads %}
+            <tr>
+                <td>
+                    <div class="lead-name-cell">{{ lead.name }}</div>
+                </td>
+                <td>{{ lead.program }}</td>
+                <td><span class="status-badge status-{{ lead.stage|lower }}">{{ lead.stage }}</span></td>
+                <td>{{ lead.date|date:"Y-m-d" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">No leads found for your department.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</article>
+{% endblock %}

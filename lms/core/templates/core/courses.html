@@ -17,14 +17,6 @@
     </div>
 </section>
 
-{% if messages %}
-<div class="messages">
-    {% for message in messages %}
-    <div class="message {{ message.tags }}">{{ message }}</div>
-    {% endfor %}
-</div>
-{% endif %}
-
 <div class="courses-grid">
     <!-- Departments Panel -->
     <div class="courses-panel">
@@ -278,33 +270,62 @@ function closeProgModal() {
 // Form submissions
 document.addEventListener('DOMContentLoaded', function() {
     const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+    function showFormError(message) {
+        window.alert(message || 'An error occurred. Please try again.');
+    }
+
+    function submitCourseForm(form, editIdFieldId, addUrl, updateUrlPrefix) {
+        const formData = new FormData(form);
+        const id = document.getElementById(editIdFieldId).value;
+        let url = addUrl;
+
+        if (id) {
+            url = updateUrlPrefix + id + '/update/';
+        }
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(async function(response) {
+            const contentType = response.headers.get('content-type') || '';
+
+            if (contentType.includes('application/json')) {
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    location.reload();
+                    return;
+                }
+
+                showFormError(data.error || 'Unable to save. Please check your input and try again.');
+                return;
+            }
+
+            // Fallback for non-JSON responses (e.g., redirects from non-AJAX handling).
+            if (response.ok) {
+                location.reload();
+                return;
+            }
+
+            showFormError('Server returned an unexpected response. Please try again.');
+        })
+        .catch(function(error) {
+            console.error('Course form submission failed:', error);
+            showFormError('Unable to connect to the server. Please try again.');
+        });
+    }
     
     // Department Form
     const deptForm = document.getElementById('deptForm');
     if (deptForm) {
         deptForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            const formData = new FormData(deptForm);
-            const id = document.getElementById('editDeptId').value;
-            let url = '/courses/department/add/';
-            if (id) {
-                url = '/courses/department/' + id + '/update/';
-            }
-            
-            fetch(url, {
-                method: 'POST',
-                headers: { 'X-CSRFToken': csrfToken },
-                body: formData
-            }).then(function(response) { return response.json(); })
-            .then(function(data) {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert(data.error || 'An error occurred');
-                }
-            }).catch(function() {
-                alert('An error occurred. Please try again.');
-            });
+            submitCourseForm(deptForm, 'editDeptId', '/courses/department/add/', '/courses/department/');
         });
     }
     
@@ -313,27 +334,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (progForm) {
         progForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            const formData = new FormData(progForm);
-            const id = document.getElementById('editProgId').value;
-            let url = '/courses/program/add/';
-            if (id) {
-                url = '/courses/program/' + id + '/update/';
-            }
-            
-            fetch(url, {
-                method: 'POST',
-                headers: { 'X-CSRFToken': csrfToken },
-                body: formData
-            }).then(function(response) { return response.json(); })
-            .then(function(data) {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert(data.error || 'An error occurred');
-                }
-            }).catch(function() {
-                alert('An error occurred. Please try again.');
-            });
+            submitCourseForm(progForm, 'editProgId', '/courses/program/add/', '/courses/program/');
         });
     }
     

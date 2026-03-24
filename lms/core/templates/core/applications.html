@@ -76,11 +76,10 @@
                         data-address="{{ app.address }}"
                         data-nationality="{{ app.nationality }}"
                         data-alt-contact="{{ app.alternate_contact }}"
-                        data-intake-year="{{ app.desired_intake_year }}"
-                        data-intake-sem="{{ app.intake_semester }}"
                         data-education="{{ app.highest_education_level }}"
                         data-gpa="{{ app.gpa_or_percentage }}"
                         data-institution="{{ app.previous_institution }}"
+                        data-edu-doc="{{ app.education_document }}"
                         data-scholarship="{{ app.scholarship_interest }}"
                         data-study-mode="{{ app.preferred_study_mode }}"
                         data-source="{{ app.source }}"
@@ -146,7 +145,31 @@
                     </div>
                 </div>
                 <div class="card-actions">
-                    <button type="button" class="action-btn view-btn app-view-btn" data-id="{{ app.id }}" title="View Application">
+                    <button type="button" class="action-btn view-btn app-view-btn"
+                        data-id="{{ app.id }}"
+                        data-applicant="{{ app.applicant }}"
+                        data-email="{{ app.email }}"
+                        data-phone="{{ app.phone }}"
+                        data-program="{{ app.program }}"
+                        data-submitted="{{ app.submitted }}"
+                        data-status="{{ app.status }}"
+                        data-dob="{{ app.date_of_birth }}"
+                        data-gender="{{ app.gender }}"
+                        data-address="{{ app.address }}"
+                        data-nationality="{{ app.nationality }}"
+                        data-alt-contact="{{ app.alternate_contact }}"
+                        data-education="{{ app.highest_education_level }}"
+                        data-gpa="{{ app.gpa_or_percentage }}"
+                        data-institution="{{ app.previous_institution }}"
+                        data-edu-doc="{{ app.education_document }}"
+                        data-scholarship="{{ app.scholarship_interest }}"
+                        data-study-mode="{{ app.preferred_study_mode }}"
+                        data-source="{{ app.source }}"
+                        data-lead-status="{{ app.lead_status }}"
+                        data-counselor="{{ app.assigned_counselor }}"
+                        data-followup="{{ app.followup_date }}"
+                        data-notes="{{ app.notes }}"
+                        title="View Application">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         View
                     </button>
@@ -192,7 +215,31 @@
                     </div>
                 </div>
                 <div class="card-actions">
-                    <button type="button" class="action-btn view-btn app-view-btn" data-id="{{ app.id }}" title="View Application">
+                    <button type="button" class="action-btn view-btn app-view-btn"
+                        data-id="{{ app.id }}"
+                        data-applicant="{{ app.applicant }}"
+                        data-email="{{ app.email }}"
+                        data-phone="{{ app.phone }}"
+                        data-program="{{ app.program }}"
+                        data-submitted="{{ app.submitted }}"
+                        data-status="{{ app.status }}"
+                        data-dob="{{ app.date_of_birth }}"
+                        data-gender="{{ app.gender }}"
+                        data-address="{{ app.address }}"
+                        data-nationality="{{ app.nationality }}"
+                        data-alt-contact="{{ app.alternate_contact }}"
+                        data-education="{{ app.highest_education_level }}"
+                        data-gpa="{{ app.gpa_or_percentage }}"
+                        data-institution="{{ app.previous_institution }}"
+                        data-edu-doc="{{ app.education_document }}"
+                        data-scholarship="{{ app.scholarship_interest }}"
+                        data-study-mode="{{ app.preferred_study_mode }}"
+                        data-source="{{ app.source }}"
+                        data-lead-status="{{ app.lead_status }}"
+                        data-counselor="{{ app.assigned_counselor }}"
+                        data-followup="{{ app.followup_date }}"
+                        data-notes="{{ app.notes }}"
+                        title="View Application">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         View
                     </button>
@@ -279,14 +326,6 @@
                         <span id="viewProgram">—</span>
                     </div>
                     <div class="view-field">
-                        <label>Intake Year</label>
-                        <span id="viewIntakeYear">—</span>
-                    </div>
-                    <div class="view-field">
-                        <label>Intake Semester</label>
-                        <span id="viewIntakeSem">—</span>
-                    </div>
-                    <div class="view-field">
                         <label>Education Level</label>
                         <span id="viewEducation">—</span>
                     </div>
@@ -297,6 +336,10 @@
                     <div class="view-field full">
                         <label>Previous Institution</label>
                         <span id="viewInstitution">—</span>
+                    </div>
+                    <div class="view-field full">
+                        <label>Education Document</label>
+                        <span id="viewEduDoc"><a href="#" id="viewEduDocLink" target="_blank" style="color: #0f766e; text-decoration: underline;">View Document</a></span>
                     </div>
                     <div class="view-field">
                         <label>Scholarship Interest</label>

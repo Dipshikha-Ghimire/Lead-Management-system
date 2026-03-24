@@ -36,11 +36,19 @@
         document.getElementById('viewLeadAltContact').textContent = btn.dataset.altContact || '—';
         
         document.getElementById('viewLeadProgram').textContent = btn.dataset.program || '—';
-        document.getElementById('viewLeadIntakeYear').textContent = btn.dataset.intakeYear || '—';
-        document.getElementById('viewLeadIntakeSem').textContent = btn.dataset.intakeSem || '—';
         document.getElementById('viewLeadEducation').textContent = btn.dataset.education || '—';
         document.getElementById('viewLeadGpa').textContent = btn.dataset.gpa || '—';
         document.getElementById('viewLeadInstitution').textContent = btn.dataset.institution || '—';
+        
+        const eduDocLink = document.getElementById('viewLeadEduDocLink');
+        const eduDocUrl = btn.dataset.eduDoc;
+        if (eduDocUrl) {
+            eduDocLink.href = eduDocUrl;
+            eduDocLink.style.display = 'inline';
+        } else {
+            eduDocLink.style.display = 'none';
+        }
+        
         document.getElementById('viewLeadScholarship').textContent = btn.dataset.scholarship || '—';
         document.getElementById('viewLeadStudyMode').textContent = btn.dataset.studyMode || '—';
         
@@ -66,9 +74,24 @@
         `;
     }
 
-    function openViewApplication(btn) {
-        populateViewModal(btn);
-        openViewModal();
+    async function openViewApplication(btn) {
+        try {
+            const lead = await fetchLeadDetails(btn.dataset.id);
+            // Populate basic info from data attributes
+            populateViewModal(btn);
+            // Update enrollment info from API
+            document.getElementById('viewLeadExamResult').textContent = lead.exam_result || '—';
+            document.getElementById('viewLeadExamScore').textContent = lead.exam_score || '—';
+            document.getElementById('viewLeadFinalCourseFee').textContent = lead.final_course_fee
+                ? `NPR ${lead.final_course_fee}`
+                : '—';
+            document.getElementById('viewLeadEnrollmentNote').textContent = lead.enrollment_note || '—';
+            openViewModal();
+        } catch (error) {
+            // Fallback to basic view if API fails
+            populateViewModal(btn);
+            openViewModal();
+        }
     }
 
     // Edit Modal Functions
@@ -87,11 +110,17 @@
                 document.getElementById('editNationality').value = viewBtn.dataset.nationality || '';
                 document.getElementById('editAlternateContact').value = viewBtn.dataset.altContact || '';
                 document.getElementById('editProgramInterest').value = viewBtn.dataset.program || '';
-                document.getElementById('editDesiredIntakeYear').value = viewBtn.dataset.intakeYear || '';
                 document.getElementById('editHighestEducationLevel').value = viewBtn.dataset.education || '';
                 document.getElementById('editGpaOrPercentage').value = viewBtn.dataset.gpa || '';
                 document.getElementById('editPreviousInstitution').value = viewBtn.dataset.institution || '';
                 document.getElementById('editNotes').value = viewBtn.dataset.notes || '';
+                
+                const currentEduDoc = document.getElementById('currentEduDoc');
+                if (viewBtn.dataset.eduDoc) {
+                    currentEduDoc.textContent = 'Current: ' + viewBtn.dataset.eduDoc.split('/').pop();
+                } else {
+                    currentEduDoc.textContent = 'No document uploaded';
+                }
                 
                 document.getElementById('leadEditModalTitle').textContent = `Edit Lead - L${String(viewBtn.dataset.id).padStart(4, '0')}`;
             }
@@ -114,11 +143,17 @@
             document.getElementById('editNationality').value = btn.dataset.nationality || '';
             document.getElementById('editAlternateContact').value = btn.dataset.altContact || '';
             document.getElementById('editProgramInterest').value = btn.dataset.program || '';
-            document.getElementById('editDesiredIntakeYear').value = btn.dataset.intakeYear || '';
             document.getElementById('editHighestEducationLevel').value = btn.dataset.education || '';
             document.getElementById('editGpaOrPercentage').value = btn.dataset.gpa || '';
             document.getElementById('editPreviousInstitution').value = btn.dataset.institution || '';
             document.getElementById('editNotes').value = btn.dataset.notes || '';
+            
+            const currentEduDoc = document.getElementById('currentEduDoc');
+            if (btn.dataset.eduDoc) {
+                currentEduDoc.textContent = 'Current: ' + btn.dataset.eduDoc.split('/').pop();
+            } else {
+                currentEduDoc.textContent = 'No document uploaded';
+            }
             
             document.getElementById('leadEditModalTitle').textContent = `Edit Lead - L${String(btn.dataset.id).padStart(4, '0')}`;
         }
@@ -156,8 +191,15 @@
             document.getElementById('editNationality').value = lead.nationality || '';
             document.getElementById('editAlternateContact').value = lead.alternate_contact || '';
             document.getElementById('editProgramInterest').value = lead.program_interest || '';
-            document.getElementById('editDesiredIntakeYear').value = lead.desired_intake_year || '';
-            document.getElementById('editIntakeSemester').value = lead.intake_semester || '';
+            const desiredIntakeYearInput = document.getElementById('editDesiredIntakeYear');
+            if (desiredIntakeYearInput) {
+                desiredIntakeYearInput.value = lead.desired_intake_year || '';
+            }
+
+            const intakeSemesterInput = document.getElementById('editIntakeSemester');
+            if (intakeSemesterInput) {
+                intakeSemesterInput.value = lead.intake_semester || '';
+            }
             document.getElementById('editHighestEducationLevel').value = lead.highest_education_level || '';
             document.getElementById('editGpaOrPercentage').value = lead.gpa_or_percentage || '';
             document.getElementById('editPreviousInstitution').value = lead.previous_institution || '';
@@ -168,6 +210,14 @@
             document.getElementById('editAssignedStaffId').value = lead.assigned_staff_id || '';
             document.getElementById('editFollowupDate').value = lead.followup_date || '';
             document.getElementById('editNotes').value = lead.notes || '';
+            
+            // Update enrollment info fields from API
+            document.getElementById('viewLeadExamResult').textContent = lead.exam_result || '—';
+            document.getElementById('viewLeadExamScore').textContent = lead.exam_score || '—';
+            document.getElementById('viewLeadFinalCourseFee').textContent = lead.final_course_fee
+                ? `NPR ${lead.final_course_fee}`
+                : '—';
+            document.getElementById('viewLeadEnrollmentNote').textContent = lead.enrollment_note || '—';
             
             document.getElementById('leadEditModalTitle').textContent = `Edit Lead - L${String(lead.lead_id).padStart(4, '0')}`;
             
@@ -182,40 +232,41 @@
         event.preventDefault();
         
         const leadId = document.getElementById('editLeadId').value;
-        const payload = new URLSearchParams({
-            csrfmiddlewaretoken: csrfToken,
-            first_name: document.getElementById('editFirstName').value.trim(),
-            last_name: document.getElementById('editLastName').value.trim(),
-            email: document.getElementById('editEmail').value.trim(),
-            phone: document.getElementById('editPhone').value.trim(),
-            date_of_birth: document.getElementById('editDateOfBirth').value,
-            gender: document.getElementById('editGender').value,
-            address: document.getElementById('editAddress').value.trim(),
-            nationality: document.getElementById('editNationality').value.trim(),
-            alternate_contact: document.getElementById('editAlternateContact').value.trim(),
-            program_interest: document.getElementById('editProgramInterest').value.trim(),
-            desired_intake_year: document.getElementById('editDesiredIntakeYear').value,
-            intake_semester: document.getElementById('editIntakeSemester').value,
-            highest_education_level: document.getElementById('editHighestEducationLevel').value,
-            gpa_or_percentage: document.getElementById('editGpaOrPercentage').value.trim(),
-            previous_institution: document.getElementById('editPreviousInstitution').value.trim(),
-            scholarship_interest: document.getElementById('editScholarshipInterest').value,
-            preferred_study_mode: document.getElementById('editPreferredStudyMode').value,
-            current_status: document.getElementById('editStatus').value,
-            source: document.getElementById('editSource').value,
-            assigned_staff_id: document.getElementById('editAssignedStaffId').value,
-            followup_date: document.getElementById('editFollowupDate').value,
-            notes: document.getElementById('editNotes').value.trim(),
-        });
+        const formData = new FormData();
+        formData.append('csrfmiddlewaretoken', csrfToken);
+        formData.append('first_name', document.getElementById('editFirstName').value.trim());
+        formData.append('last_name', document.getElementById('editLastName').value.trim());
+        formData.append('email', document.getElementById('editEmail').value.trim());
+        formData.append('phone', document.getElementById('editPhone').value.trim());
+        formData.append('date_of_birth', document.getElementById('editDateOfBirth').value);
+        formData.append('gender', document.getElementById('editGender').value);
+        formData.append('address', document.getElementById('editAddress').value.trim());
+        formData.append('nationality', document.getElementById('editNationality').value.trim());
+        formData.append('alternate_contact', document.getElementById('editAlternateContact').value.trim());
+        formData.append('program_interest', document.getElementById('editProgramInterest').value.trim());
+        formData.append('highest_education_level', document.getElementById('editHighestEducationLevel').value);
+        formData.append('gpa_or_percentage', document.getElementById('editGpaOrPercentage').value.trim());
+        formData.append('previous_institution', document.getElementById('editPreviousInstitution').value.trim());
+        formData.append('scholarship_interest', document.getElementById('editScholarshipInterest').value);
+        formData.append('preferred_study_mode', document.getElementById('editPreferredStudyMode').value);
+        formData.append('current_status', document.getElementById('editStatus').value);
+        formData.append('source', document.getElementById('editSource').value);
+        formData.append('assigned_staff_id', document.getElementById('editAssignedStaffId').value);
+        formData.append('followup_date', document.getElementById('editFollowupDate').value);
+        formData.append('notes', document.getElementById('editNotes').value.trim());
+        
+        const eduDocFile = document.getElementById('editEducationDocument').files[0];
+        if (eduDocFile) {
+            formData.append('education_document', eduDocFile);
+        }
 
         try {
             const response = await fetch(`/leads/${leadId}/update/`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
                     'X-CSRFToken': csrfToken,
                 },
-                body: payload.toString(),
+                body: formData,
             });
 
             const result = await response.json().catch(() => ({}));

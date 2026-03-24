@@ -44,22 +44,74 @@ class Program(models.Model):
 class Staff(models.Model):
     ROLE_CHOICES = [
         ('counselor', 'Counselor'),
-        ('admin', 'Admin'),
-        ('finance', 'Finance'),
+        ('staff', 'Staff'),
     ]
 
     staff_id = models.AutoField(primary_key=True)
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='staff_profile',
+        null=True,
+        blank=True
+    )
     full_name = models.CharField(max_length=255)
     email = models.EmailField(unique=True, db_index=True)
-    role = models.CharField(max_length=50, choices=ROLE_CHOICES, help_text='e.g. Counselor, Admin, Finance')
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES, help_text='e.g. Counselor, Staff')
     phone = models.CharField(max_length=20, blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
-    department = models.CharField(max_length=255, blank=True, null=True)
+    department = models.ForeignKey(
+        'Department',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='staff_members'
+    )
 
     class Meta:
         db_table = 'staff'
         verbose_name = 'Staff Member'
         verbose_name_plural = 'Staff'
+
+    def __str__(self):
+        return f"{self.full_name} ({self.role})"
+
+
+class Admin(models.Model):
+    ROLE_CHOICES = [
+        ('super_admin', 'Super Admin'),
+        ('admin', 'Admin'),
+        ('manager', 'Manager'),
+    ]
+
+    admin_id = models.AutoField(primary_key=True)
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='admin_profile',
+        null=True,
+        blank=True
+    )
+    full_name = models.CharField(max_length=255)
+    email = models.EmailField(unique=True, db_index=True)
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='admin')
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    bio = models.TextField(blank=True, null=True)
+    department = models.ForeignKey(
+        'Department',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='admins'
+    )
+    designation = models.CharField(max_length=255, blank=True, null=True)
+    office_location = models.CharField(max_length=255, blank=True, null=True)
+    emergency_contact = models.CharField(max_length=20, blank=True, null=True)
+
+    class Meta:
+        db_table = 'admins'
+        verbose_name = 'Admin'
+        verbose_name_plural = 'Admins'
 
     def __str__(self):
         return f"{self.full_name} ({self.role})"
@@ -85,8 +137,6 @@ class Lead(models.Model):
         ('qualified', 'Qualified'),
         ('followup', 'Follow-up'),
         ('exams', 'Exams'),
-        ('passed', 'Passed'),
-        ('failed', 'Failed'),
         ('enrolled', 'Enrolled'),
         ('dropped', 'Dropped'),
     ]
@@ -95,12 +145,6 @@ class Lead(models.Model):
         ('male', 'Male'),
         ('female', 'Female'),
         ('prefer_not_to_say', 'Prefer not to say'),
-    ]
-
-    INTAKE_SEMESTER_CHOICES = [
-        ('spring', 'Spring (Jan-May)'),
-        ('fall', 'Fall (Aug-Dec)'),
-        ('summer', 'Summer (May-Aug)'),
     ]
 
     EDUCATION_LEVEL_CHOICES = [
@@ -123,6 +167,14 @@ class Lead(models.Model):
     ]
 
     lead_id = models.AutoField(primary_key=True)
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='lead_profile',
+        help_text='Linked user account for lead users'
+    )
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(blank=True, null=True, db_index=True)
@@ -133,11 +185,10 @@ class Lead(models.Model):
     nationality = models.CharField(max_length=100, blank=True, null=True)
     alternate_contact = models.CharField(max_length=20, blank=True, null=True)
     program_interest = models.CharField(max_length=255, blank=True, null=True)
-    desired_intake_year = models.PositiveSmallIntegerField(blank=True, null=True)
-    intake_semester = models.CharField(max_length=20, choices=INTAKE_SEMESTER_CHOICES, blank=True, null=True)
-    highest_education_level = models.CharField(max_length=30, choices=EDUCATION_LEVEL_CHOICES, blank=True, null=True)
+    highest_education_level = models.CharField(max_length=30, choices=EDUCATION_LEVEL_CHOICES, default='high_school')
     gpa_or_percentage = models.CharField(max_length=50, blank=True, null=True)
     previous_institution = models.CharField(max_length=255, blank=True, null=True)
+    education_document = models.FileField(upload_to='lead_documents/', blank=True, null=True)
     scholarship_interest = models.CharField(max_length=20, choices=SCHOLARSHIP_INTEREST_CHOICES, blank=True, null=True)
     preferred_study_mode = models.CharField(max_length=20, choices=STUDY_MODE_CHOICES, blank=True, null=True)
     source = models.CharField(max_length=50, choices=SOURCE_CHOICES, help_text='How the lead heard about the institution')
@@ -235,6 +286,16 @@ class Application(models.Model):
     documents_url = models.URLField(blank=True, null=True)
     approved_at = models.DateTimeField(null=True, blank=True)
     rejected_at = models.DateTimeField(null=True, blank=True)
+    
+    exam_name = models.CharField(max_length=200, blank=True, null=True)
+    exam_date = models.DateTimeField(blank=True, null=True)
+    exam_type = models.CharField(max_length=20, choices=[('online', 'Online'), ('physical', 'Physical')], blank=True, null=True)
+    exam_score = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    exam_result = models.CharField(max_length=20, choices=[('pass', 'Pass'), ('fail', 'Fail')], blank=True, null=True)
+    
+    scholarship_percentage = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    scholarship_approved = models.BooleanField(default=False)
+    final_course_fee = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
     class Meta:
         db_table = 'applications'

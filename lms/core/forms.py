@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
 import re
+from .models import Lead, Program, Staff
 
 
 
@@ -192,4 +193,93 @@ class SignupForm(forms.Form):
         if password1 and password2 and password1 != password2:
             raise ValidationError('Passwords do not match. Please try again.')
         
+        return cleaned_data
+
+
+class LeadSubmissionForm(forms.Form):
+    first_name = forms.CharField(max_length=100, required=True)
+    last_name = forms.CharField(max_length=100, required=True)
+    email = forms.EmailField(required=False)
+    phone = forms.CharField(max_length=20, required=True)
+    date_of_birth = forms.DateField(required=False, input_formats=['%Y-%m-%d'])
+    gender = forms.ChoiceField(required=False, choices=Lead.GENDER_CHOICES)
+    address = forms.CharField(required=False)
+    nationality = forms.CharField(max_length=100, required=False)
+    alternate_contact = forms.CharField(max_length=20, required=False)
+    program_interest = forms.CharField(max_length=255, required=True)
+    education_level = forms.ChoiceField(required=True, choices=Lead.EDUCATION_LEVEL_CHOICES)
+    gpa_or_percentage = forms.CharField(max_length=50, required=False)
+    previous_institution = forms.CharField(max_length=255, required=False)
+    education_document = forms.FileField(required=False)
+    scholarship_interest = forms.ChoiceField(required=False, choices=Lead.SCHOLARSHIP_INTEREST_CHOICES)
+    study_mode = forms.ChoiceField(required=False, choices=Lead.STUDY_MODE_CHOICES)
+    lead_source = forms.ChoiceField(required=True, choices=Lead.SOURCE_CHOICES)
+    lead_status = forms.ChoiceField(required=False, choices=Lead.STATUS_CHOICES)
+    counselor = forms.IntegerField(required=False)
+    followup_date = forms.DateField(required=False, input_formats=['%Y-%m-%d'])
+    notes = forms.CharField(required=False)
+
+    def __init__(self, *args, user_role='lead', **kwargs):
+        self.user_role = user_role
+        super().__init__(*args, **kwargs)
+
+    def clean_first_name(self):
+        value = (self.cleaned_data.get('first_name') or '').strip()
+        if not value:
+            raise ValidationError('First name is required.')
+        return value
+
+    def clean_last_name(self):
+        value = (self.cleaned_data.get('last_name') or '').strip()
+        if not value:
+            raise ValidationError('Last name is required.')
+        return value
+
+    def clean_phone(self):
+        value = (self.cleaned_data.get('phone') or '').strip()
+        if not value:
+            raise ValidationError('Phone number is required.')
+        return value
+
+    def clean_program_interest(self):
+        value = (self.cleaned_data.get('program_interest') or '').strip()
+        if not value:
+            raise ValidationError('Please select a program.')
+
+        program = Program.objects.filter(name__iexact=value).first()
+        if not program:
+            program = Program.objects.filter(name__icontains=value).first()
+        if not program:
+            raise ValidationError('Selected program is invalid.')
+
+        self.cleaned_data['program_obj'] = program
+        return value
+
+    def clean_counselor(self):
+        counselor_id = self.cleaned_data.get('counselor')
+        if not counselor_id:
+            return None
+
+        counselor = Staff.objects.filter(staff_id=counselor_id).first()
+        if not counselor:
+            raise ValidationError('Selected counselor is invalid.')
+        return counselor
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        education_level = cleaned_data.get('education_level')
+        education_document = cleaned_data.get('education_document')
+        if education_level and not education_document:
+            self.add_error('education_document', 'Education document is required after selecting highest education level.')
+
+        # Lead users cannot assign workflow-only fields.
+        if self.user_role == 'lead':
+            cleaned_data['lead_status'] = 'new'
+            cleaned_data['counselor'] = None
+            cleaned_data['followup_date'] = None
+            cleaned_data['notes'] = None
+        elif not cleaned_data.get('lead_status'):
+            cleaned_data['lead_status'] = 'new'
+
         return cleaned_data

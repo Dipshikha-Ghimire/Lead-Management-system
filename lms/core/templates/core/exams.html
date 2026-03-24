@@ -1,56 +1,597 @@
 {% extends 'core/base.html' %}
-{% block title %}Exams{% endblock %}
+{% block title %}Exams Management{% endblock %}
 
 {% block content %}
+<style>
+.exam-section {
+    margin-bottom: 2rem;
+}
+.exam-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+.exam-section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.exam-section-title svg {
+    width: 24px;
+    height: 24px;
+    color: #4f46e5;
+}
+.exam-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-weight: 500;
+}
+.exam-badge.pending { background: #fef3c7; color: #92400e; }
+.exam-badge.passed { background: #d1fae5; color: #065f46; }
+.exam-badge.failed { background: #fee2e2; color: #991b1b; }
+.exam-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.exam-table th {
+    background: #f9fafb;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.exam-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 0.875rem;
+}
+.exam-table tr:last-child td { border-bottom: none; }
+.exam-table tr:hover { background: #f9fafb; }
+.lead-info { display: flex; flex-direction: column; }
+.lead-name { font-weight: 500; color: #1f2937; }
+.lead-email { font-size: 0.75rem; color: #6b7280; }
+.program-tag {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background: #e0e7ff;
+    color: #3730a3;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+.action-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.action-btn.primary {
+    background: #4f46e5;
+    color: white;
+}
+.action-btn.primary:hover { background: #4338ca; }
+.action-btn.success {
+    background: #10b981;
+    color: white;
+}
+.action-btn.success:hover { background: #059669; }
+.action-btn.danger {
+    background: #ef4444;
+    color: white;
+}
+.action-btn.danger:hover { background: #dc2626; }
+.action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal {
+    background: white;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+}
+.modal-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.modal-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #6b7280;
+    line-height: 1;
+}
+.modal-body { padding: 1.5rem; }
+.form-group { margin-bottom: 1rem; }
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.375rem;
+}
+.form-input, .form-select {
+    width: 100%;
+    padding: 0.625rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-input:focus, .form-select:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+}
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+.modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+.score-display {
+    text-align: center;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+}
+.score-display.passed { background: #d1fae5; }
+.score-display.failed { background: #fee2e2; }
+.score-value {
+    font-size: 2rem;
+    font-weight: 700;
+}
+.score-value.passed { color: #065f46; }
+.score-value.failed { color: #991b1b; }
+.score-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+.scholarship-info {
+    background: #fef3c7;
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    color: #92400e;
+}
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #6b7280;
+}
+.empty-state svg {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+.enrolled-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.enrolled-info { display: flex; align-items: center; gap: 1rem; }
+.enrolled-details h4 { margin: 0; font-size: 0.875rem; color: #1f2937; }
+.enrolled-details p { margin: 0; font-size: 0.75rem; color: #6b7280; }
+.enrolled-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+.enrolled-status.enrolled { background: #d1fae5; color: #065f46; }
+.enrolled-status.dropped { background: #fee2e2; color: #991b1b; }
+</style>
+
 <section class="page-head">
-	<h1>Exams</h1>
-	<p>Entrance exam sessions, attendance, and results summary.</p>
+    <h1>Exams Management</h1>
+    <p>Manage entrance exams and scholarship eligibility</p>
 </section>
 
-<div class="cards cards-3">
-	<article class="card metric-card">
-		<h3>Upcoming Sessions</h3>
-		<p>{{ upcoming_count }}</p>
-		<small>Scheduled exams</small>
-	</article>
-	<article class="card metric-card">
-		<h3>Registered Students</h3>
-		<p>{{ registered_count }}</p>
-		<small>Total applicants</small>
-	</article>
-	<article class="card metric-card">
-		<h3>Pass Rate</h3>
-		<p>{{ pass_rate }}%</p>
-		<small>Of graded exams</small>
-	</article>
+<!-- Entrance Exam Section -->
+<div class="exam-section">
+    <div class="exam-section-header">
+        <div class="exam-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+            Entrance Exam
+        </div>
+        <span class="exam-badge pending">{{ entrance_exam_leads|length }} Pending</span>
+    </div>
+    
+    {% if entrance_exam_leads %}
+    <table class="exam-table">
+        <thead>
+            <tr>
+                <th>Applicant</th>
+                <th>Program</th>
+                <th>Email</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in entrance_exam_leads %}
+            <tr>
+                <td>
+                    <div class="lead-info">
+                        <span class="lead-name">{{ app.lead.first_name }} {{ app.lead.last_name }}</span>
+                    </div>
+                </td>
+                <td><span class="program-tag">{{ app.program.name }}</span></td>
+                <td>{{ app.lead.email }}</td>
+                <td>
+                    <button class="action-btn primary" onclick="openExamModal({{ app.app_id }}, '{{ app.lead.first_name|escapejs }} {{ app.lead.last_name|escapejs }}', '{{ app.program.name|escapejs }}')">
+                        Enter Exam Info
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M8 12l2 2 4-4"/>
+        </svg>
+        <p>No leads pending for entrance exam</p>
+    </div>
+    {% endif %}
 </div>
 
-<article class="card">
-	<table class="table">
-		<thead>
-			<tr>
-				<th>Exam for Program</th>
-				<th>Student</th>
-				<th>Date</th>
-				<th>Type</th>
-				<th>Status</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for session in exam_sessions %}
-			<tr>
-				<td>{{ session.application.program.name }}</td>
-				<td>{{ session.application.lead.first_name }} {{ session.application.lead.last_name }}</td>
-				<td>{{ session.exam_date|date:"Y-m-d H:i" }}</td>
-				<td>{{ session.get_type_display }}</td>
-				<td>{{ session.get_result_status_display|default:"Pending" }}</td>
-			</tr>
-			{% empty %}
-			<tr>
-				<td colspan="5" style="text-align: center;">No exams scheduled.</td>
-			</tr>
-			{% endfor %}
-		</tbody>
-	</table>
-</article>
+<!-- Scholarship Section -->
+<div class="exam-section">
+    <div class="exam-section-header">
+        <div class="exam-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="8" r="7"/>
+                <path d="M8.21 13.89L7 23l5-3 5 3-1.21-9.12"/>
+            </svg>
+            Scholarship Review
+        </div>
+        <span class="exam-badge pending">{{ scholarship_leads|length }} Review</span>
+    </div>
+    
+    {% if scholarship_leads %}
+    <table class="exam-table">
+        <thead>
+            <tr>
+                <th>Applicant</th>
+                <th>Program</th>
+                <th>Score</th>
+                <th>Result</th>
+                <th>Potential Scholarship</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in scholarship_leads %}
+            <tr>
+                <td>
+                    <div class="lead-info">
+                        <span class="lead-name">{{ app.lead.first_name }} {{ app.lead.last_name }}</span>
+                    </div>
+                </td>
+                <td><span class="program-tag">{{ app.program.name }}</span></td>
+                <td><strong>{{ app.exam_score }}</strong></td>
+                <td>
+                    {% if app.exam_result == 'pass' %}
+                    <span class="exam-badge passed">Passed</span>
+                    {% else %}
+                    <span class="exam-badge failed">Failed</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if app.scholarship_percentage %}
+                    <span class="scholarship-info">{{ app.scholarship_percentage }}% Scholarship (Score: {{ app.exam_score }})</span>
+                    {% elif app.exam_score >= 90 %}
+                    <span class="scholarship-info">Up to 40% (Score: {{ app.exam_score }})</span>
+                    {% else %}
+                    <span style="color: #6b7280;">No scholarship eligible</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <button class="action-btn" onclick="editExamDetails({{ app.app_id }}, '{{ app.lead.first_name }} {{ app.lead.last_name }}', '{{ app.program.name }}')">Edit</button>
+                    {% if app.exam_result == 'pass' %}
+                    <button class="action-btn success" onclick="approveScholarship({{ app.app_id }})">Approve</button>
+                    <button class="action-btn danger" onclick="disapproveScholarship({{ app.app_id }})">Disapprove</button>
+                    {% else %}
+                    <button class="action-btn danger" onclick="disapproveScholarship({{ app.app_id }})">Mark Dropped</button>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+        </svg>
+        <p>No exams pending scholarship review</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Enrollment Info Section -->
+<div class="exam-section">
+    <div class="exam-section-header">
+        <div class="exam-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            Enrollment Info
+        </div>
+    </div>
+    
+    {% if enrolled_leads %}
+    {% for app in enrolled_leads %}
+    <div class="enrolled-card">
+        <div class="enrolled-info">
+            <div class="enrolled-details">
+                <h4>{{ app.lead.first_name }} {{ app.lead.last_name }}</h4>
+                <p>{{ app.program.name }}</p>
+                {% if app.final_course_fee %}
+                <p style="color: #059669; font-weight: 500;">
+                    Course Fee: NPR {{ app.final_course_fee|floatformat:2 }}
+                    {% if app.scholarship_approved and app.scholarship_percentage %}
+                    <span style="background: #d1fae5; padding: 2px 8px; border-radius: 4px; margin-left: 8px;">
+                        Scholarship: {{ app.scholarship_percentage }}% OFF
+                    </span>
+                    {% endif %}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+        <span class="enrolled-status {% if app.lead.current_status == 'enrolled' %}enrolled{% else %}dropped{% endif %}">
+            {{ app.lead.get_current_status_display|title }}
+        </span>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+        </svg>
+        <p>No enrollments yet</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Exam Modal -->
+<div class="modal-overlay" id="examModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title" id="examModalTitle">Enter Exam Information</h3>
+            <button class="modal-close" onclick="closeExamModal()">&times;</button>
+        </div>
+        <form id="examForm">
+            <div class="modal-body">
+                <input type="hidden" id="modalAppId" name="application_id">
+                
+                <div class="form-group">
+                    <label class="form-label">Applicant</label>
+                    <input type="text" class="form-input" id="modalApplicantName" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Program</label>
+                    <input type="text" class="form-input" id="modalProgramName" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Exam Name *</label>
+                    <input type="text" class="form-input" name="exam_name" required placeholder="e.g., Entrance Exam 2024">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Exam Date *</label>
+                        <input type="date" class="form-input" name="exam_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Exam Type *</label>
+                        <select class="form-select" name="exam_type" required>
+                            <option value="">Select Type</option>
+                            <option value="online">Online</option>
+                            <option value="physical">Physical</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Score (0-100) *</label>
+                    <input type="number" class="form-input" name="exam_score" required min="0" max="100" placeholder="Enter score">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="action-btn" onclick="closeExamModal()">Cancel</button>
+                <button type="submit" class="action-btn primary">Submit Exam</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openExamModal(appId, applicantName, programName) {
+    document.getElementById('modalAppId').value = appId;
+    document.getElementById('modalApplicantName').value = applicantName;
+    document.getElementById('modalProgramName').value = programName;
+    document.getElementById('examModalTitle').textContent = 'Enter Exam Information';
+    document.getElementById('examForm').reset();
+    document.getElementById('examModal').classList.add('active');
+}
+
+function editExamDetails(appId, applicantName, programName) {
+    fetch('{% url "exam_detail_api" %}?application_id=' + appId, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const exam = data.exam;
+            document.getElementById('modalAppId').value = exam.application_id;
+            document.getElementById('modalApplicantName').value = applicantName;
+            document.getElementById('modalProgramName').value = programName;
+            document.getElementById('examModalTitle').textContent = 'Edit Exam Information';
+            
+            document.querySelector('input[name="exam_name"]').value = exam.exam_name || '';
+            document.querySelector('input[name="exam_date"]').value = exam.exam_date || '';
+            document.querySelector('select[name="exam_type"]').value = exam.exam_type || '';
+            document.querySelector('input[name="exam_score"]').value = exam.exam_score || '';
+            
+            document.getElementById('examModal').classList.add('active');
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error loading exam details');
+    });
+}
+
+function closeExamModal() {
+    document.getElementById('examModal').classList.remove('active');
+    document.getElementById('examForm').reset();
+}
+
+document.getElementById('examForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    
+    fetch('{% url "submit_exam_info" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeExamModal();
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error submitting exam info');
+    });
+});
+
+function approveScholarship(appId) {
+    if (!confirm('Approve scholarship for this applicant?')) return;
+    
+    const formData = new FormData();
+    formData.append('application_id', appId);
+    
+    fetch('{% url "approve_scholarship" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    });
+}
+
+function disapproveScholarship(appId) {
+    if (!confirm('Disapprove scholarship for this applicant?')) return;
+    
+    const formData = new FormData();
+    formData.append('application_id', appId);
+    
+    fetch('{% url "disapprove_scholarship" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    });
+}
+
+document.querySelector('.modal-overlay').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeExamModal();
+    }
+});
+</script>
 {% endblock %}

@@ -23,8 +23,8 @@
         <!-- Header -->
         <div class="header">
             <div class="header-badge">Kathmandu University</div>
-            <h1>Prospect <span>Enrollment</span> Portal</h1>
-            <p>Capture and track prospective student information across all programs</p>
+            <h1>Student <span>Application</span> Portal</h1>
+            <!-- <p>Capture and track prospective student information across all programs</p> -->
         </div>
 
         <!-- Steps Nav -->
@@ -138,32 +138,14 @@
                             <span class="error-msg" id="programErr">Please select a program</span>
                         </div>
                         <div class="field">
-                            <label>Desired Intake Year <span class="req">*</span></label>
-                            <select id="intakeYear">
-                                <option value="">Select year</option>
-                                {% for year in intake_year_choices %}
-                                <option value="{{ year }}">{{ year }}</option>
-                                {% endfor %}
-                            </select>
-                            <span class="error-msg" id="intakeYearErr">Please select intake year</span>
-                        </div>
-                        <div class="field">
-                            <label>Intake Semester</label>
-                            <select id="intakeSem">
-                                <option value="">Select semester</option>
-                                {% for key, label in intake_semester_choices %}
-                                <option value="{{ key }}">{{ label }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="field">
-                            <label>Highest Education Level</label>
+                            <label>Highest Education Level <span class="req">*</span></label>
                             <select id="eduLevel">
                                 <option value="">Select level</option>
                                 {% for key, label in education_level_choices %}
                                 <option value="{{ key }}">{{ label }}</option>
                                 {% endfor %}
                             </select>
+                            <span class="error-msg" id="eduLevelErr">Please select education level</span>
                         </div>
                         <div class="field">
                             <label>GPA / Percentage</label>
@@ -172,6 +154,15 @@
                         <div class="field full">
                             <label>Previous Institution Name</label>
                             <input type="text" id="institution" placeholder="Name of last attended school or college" />
+                        </div>
+                        <div class="field full" id="eduDocField" style="display: none;">
+                            <label id="eduDocLabel">Education Document <span class="req">*</span></label>
+                            <div class="file-upload-wrapper">
+                                <input type="file" id="eduDoc" accept=".pdf,.jpg,.jpeg,.png" />
+                                <div class="file-upload-info" id="eduDocInfo"></div>
+                            </div>
+                            <span class="error-msg" id="eduDocErr">Please upload the required education document</span>
+                            <small class="file-hint">Accepted formats: PDF, JPG, PNG (Max 5MB)</small>
                         </div>
                         <div class="field full">
                             <label>Scholarship / Financial Aid Interest</label>

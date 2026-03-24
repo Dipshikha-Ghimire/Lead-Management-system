@@ -1,6 +1,60 @@
 let currentStep = 1;
 const totalSteps = 4;
 
+const eduDocLabels = {
+    'high_school': 'SEE/ SLC Certificate',
+    'bachelors': "Bachelor's Certificate & Marksheet",
+    'masters': "Master's Certificate & Marksheet",
+    'diploma_certificate': 'Diploma Certificate & Transcripts',
+};
+
+const eduLevelSelect = document.getElementById('eduLevel');
+const eduDocField = document.getElementById('eduDocField');
+const eduDocLabel = document.getElementById('eduDocLabel');
+const eduDocInput = document.getElementById('eduDoc');
+const eduDocInfo = document.getElementById('eduDocInfo');
+const eduDocErr = document.getElementById('eduDocErr');
+
+if (eduLevelSelect) {
+    eduLevelSelect.addEventListener('change', function() {
+        const value = this.value;
+        if (value && eduDocLabels[value]) {
+            eduDocField.style.display = 'block';
+            eduDocLabel.textContent = eduDocLabels[value];
+            eduDocInput.required = true;
+            if (eduDocErr) eduDocErr.classList.remove('show');
+            eduDocInput.classList.remove('error');
+        } else {
+            eduDocField.style.display = 'none';
+            eduDocInput.required = false;
+            eduDocInput.value = '';
+            eduDocInfo.textContent = '';
+            if (eduDocErr) eduDocErr.classList.remove('show');
+            eduDocInput.classList.remove('error');
+        }
+    });
+}
+
+if (eduDocInput) {
+    eduDocInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const maxSize = 5 * 1024 * 1024;
+            if (file.size > maxSize) {
+                alert('File size must be less than 5MB');
+                this.value = '';
+                eduDocInfo.textContent = '';
+                return;
+            }
+            eduDocInfo.textContent = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+            if (eduDocErr) eduDocErr.classList.remove('show');
+            this.classList.remove('error');
+        } else {
+            eduDocInfo.textContent = '';
+        }
+    });
+}
+
 // Source tag toggle
 document.querySelectorAll('.tag-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -57,9 +111,19 @@ function validateStep(step) {
     }
 
     if (step === 2) {
-        ['program', 'intakeYear'].forEach((field) => clearErr(field, `${field}Err`));
+        ['program', 'eduLevel'].forEach((field) => clearErr(field, `${field}Err`));
         if (!document.getElementById('program').value) showErr('program', 'programErr');
-        if (!document.getElementById('intakeYear').value) showErr('intakeYear', 'intakeYearErr');
+        if (!document.getElementById('eduLevel').value) showErr('eduLevel', 'eduLevelErr');
+
+        if (eduDocErr) eduDocErr.classList.remove('show');
+        if (eduDocInput) eduDocInput.classList.remove('error');
+        const educationSelected = document.getElementById('eduLevel').value;
+        const hasEduDoc = eduDocInput && eduDocInput.files && eduDocInput.files.length > 0;
+        if (educationSelected && !hasEduDoc) {
+            if (eduDocErr) eduDocErr.classList.add('show');
+            if (eduDocInput) eduDocInput.classList.add('error');
+            valid = false;
+        }
     }
 
     if (step === 3) {
@@ -80,14 +144,12 @@ function populateReview() {
     const leadStatusValue = leadStatusEl?.value || '';
     const leadStatusLabel = leadStatusEl?.options?.[leadStatusEl.selectedIndex]?.textContent?.trim() || '';
     const leadStatus = leadStatusLabel || leadStatusValue.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase()) || '—';
-    const intakeYear = document.getElementById('intakeYear').value || '';
-    const intakeSemesterLabel = getSelectedText('intakeSem') || '—';
-    const intakeDisplay = intakeYear ? `${intakeYear} - ${intakeSemesterLabel}` : '—';
     const genderDisplay = getSelectedText('gender') || '—';
     const programDisplay = getSelectedText('program') || document.getElementById('program').value || '—';
     const educationDisplay = getSelectedText('eduLevel') || '—';
     const counselorDisplay = getSelectedText('counselor') || '—';
     const sourceDisplay = getSelectedSourceLabel() || '—';
+    const eduDocDisplay = document.getElementById('eduDoc').files[0]?.name || '—';
 
     const data = [
         { label: 'Full Name', value: `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`, full: false },
@@ -95,8 +157,8 @@ function populateReview() {
         { label: 'Phone', value: document.getElementById('phone').value, full: false },
         { label: 'Gender', value: genderDisplay, full: false },
         { label: 'Program', value: programDisplay, full: true },
-        { label: 'Intake', value: intakeDisplay, full: false },
         { label: 'Education', value: educationDisplay, full: false },
+        { label: 'Education Doc', value: eduDocDisplay, full: false },
         { label: 'GPA / %', value: document.getElementById('gpa').value || '—', full: false },
         { label: 'Scholarship Interest', value: scholarship, full: false },
         { label: 'Study Mode', value: mode, full: false },
@@ -171,39 +233,40 @@ function updateUI() {
 async function submitForm() {
     try {
         const csrfToken = document.getElementById('csrfToken')?.value || '';
-        const payload = new URLSearchParams({
-            csrfmiddlewaretoken: csrfToken,
-            first_name: document.getElementById('firstName').value.trim(),
-            last_name: document.getElementById('lastName').value.trim(),
-            email: document.getElementById('email').value.trim(),
-            phone: document.getElementById('phone').value.trim(),
-            date_of_birth: document.getElementById('dob').value,
-            gender: document.getElementById('gender').value,
-            address: document.getElementById('address').value.trim(),
-            nationality: document.getElementById('nationality').value.trim(),
-            alternate_contact: document.getElementById('altContact').value.trim(),
-            program_interest: document.getElementById('program').value,
-            intake_year: document.getElementById('intakeYear').value,
-            intake_semester: document.getElementById('intakeSem').value,
-            education_level: document.getElementById('eduLevel').value,
-            gpa_or_percentage: document.getElementById('gpa').value.trim(),
-            previous_institution: document.getElementById('institution').value.trim(),
-            scholarship_interest: document.querySelector('input[name="scholarship"]:checked')?.value || '',
-            study_mode: document.querySelector('input[name="mode"]:checked')?.value || '',
-            lead_source: document.getElementById('leadSource').value,
-            lead_status: document.getElementById('leadStatus')?.value || 'new',
-            counselor: document.getElementById('counselor').value,
-            followup_date: document.getElementById('followupDate').value,
-            notes: document.getElementById('notes').value.trim(),
-        });
+        const formData = new FormData();
+        formData.append('csrfmiddlewaretoken', csrfToken);
+        formData.append('first_name', document.getElementById('firstName').value.trim());
+        formData.append('last_name', document.getElementById('lastName').value.trim());
+        formData.append('email', document.getElementById('email').value.trim());
+        formData.append('phone', document.getElementById('phone').value.trim());
+        formData.append('date_of_birth', document.getElementById('dob').value);
+        formData.append('gender', document.getElementById('gender').value);
+        formData.append('address', document.getElementById('address').value.trim());
+        formData.append('nationality', document.getElementById('nationality').value.trim());
+        formData.append('alternate_contact', document.getElementById('altContact').value.trim());
+        formData.append('program_interest', document.getElementById('program').value);
+        formData.append('education_level', document.getElementById('eduLevel').value);
+        formData.append('gpa_or_percentage', document.getElementById('gpa').value.trim());
+        formData.append('previous_institution', document.getElementById('institution').value.trim());
+        formData.append('scholarship_interest', document.querySelector('input[name="scholarship"]:checked')?.value || '');
+        formData.append('study_mode', document.querySelector('input[name="mode"]:checked')?.value || '');
+        formData.append('lead_source', document.getElementById('leadSource').value);
+        formData.append('lead_status', document.getElementById('leadStatus')?.value || 'new');
+        formData.append('counselor', document.getElementById('counselor').value);
+        formData.append('followup_date', document.getElementById('followupDate').value);
+        formData.append('notes', document.getElementById('notes').value.trim());
+
+        const eduDocFile = document.getElementById('eduDoc').files[0];
+        if (eduDocFile) {
+            formData.append('education_document', eduDocFile);
+        }
 
         const response = await fetch(window.location.pathname, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
                 'X-CSRFToken': csrfToken,
             },
-            body: payload.toString(),
+            body: formData,
         });
 
         const result = await response.json().catch(() => ({}));

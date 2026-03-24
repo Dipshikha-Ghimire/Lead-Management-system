@@ -24,7 +24,7 @@
         {% if messages %}
         <div class="messages">
           {% for message in messages %}
-          <p class="{% if message.tags %}{{ message.tags }}{% else %}error{% endif %}">{{ message }}</p>
+          <p class="{{ message.tags }}">{{ message }}</p>
           {% endfor %}
         </div>
         {% endif %}
@@ -78,14 +78,6 @@
           </div>
           {% endif %}
         </div>
-
-        {% if form.non_field_errors %}
-        <div class="field-errors">
-          {% for error in form.non_field_errors %}
-          <small class="error-text">{{ error }}</small>
-          {% endfor %}
-        </div>
-        {% endif %}
 
         <button type="submit" class="btn-submit">Sign Up</button>
       </form>
