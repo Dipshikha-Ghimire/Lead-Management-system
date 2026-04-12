@@ -47,6 +47,26 @@ def get_staff_department_programs(user):
     return Program.objects.none()
 
 
+def get_accessible_applications_qs(user):
+    user_role = get_user_role(user)
+    if user_role == 'staff':
+        dept = get_staff_department(user)
+        if not dept:
+            return Application.objects.none()
+        return Application.objects.filter(program__dept=dept)
+    return Application.objects.all()
+
+
+def get_accessible_leads_qs(user):
+    user_role = get_user_role(user)
+    if user_role == 'staff':
+        dept = get_staff_department(user)
+        if not dept:
+            return Lead.objects.none()
+        return Lead.objects.filter(applications__program__dept=dept).distinct()
+    return Lead.objects.all()
+
+
 def _serialize_application_row(application):
     lead = application.lead
     return {
@@ -699,14 +719,18 @@ def applications(request):
     now = timezone.now()
     three_days_ago = now - timedelta(days=3)
 
-    Application.objects.filter(
+    accessible_applications = get_accessible_applications_qs(request.user)
+
+    accessible_applications.filter(
         status='accepted',
         approved_at__lt=three_days_ago
     ).update(status='reviewed')
 
-    pending_applications = Application.objects.select_related('lead', 'program').filter(status='pending').order_by('-app_date')
-    approved_applications = Application.objects.select_related('lead', 'program').filter(status='accepted', approved_at__gte=three_days_ago).order_by('-approved_at')
-    rejected_applications = Application.objects.select_related('lead', 'program').filter(status='rejected').order_by('-rejected_at')
+    scoped_applications = accessible_applications.select_related('lead', 'program')
+
+    pending_applications = scoped_applications.filter(status='pending').order_by('-app_date')
+    approved_applications = scoped_applications.filter(status='accepted', approved_at__gte=three_days_ago).order_by('-approved_at')
+    rejected_applications = scoped_applications.filter(status='rejected').order_by('-rejected_at')
 
     pending_count = pending_applications.count()
     approved_count = approved_applications.count()
@@ -809,8 +833,16 @@ def applications(request):
             'notes': lead.notes or '',
         })
 
-    lead_choices = Lead.objects.order_by('first_name', 'last_name')
-    program_choices = Program.objects.order_by('name')
+    lead_choices = get_accessible_leads_qs(request.user).order_by('first_name', 'last_name')
+    user_role = get_user_role(request.user)
+    user_dept = get_staff_department(request.user)
+    if user_role == 'staff':
+        if user_dept:
+            program_choices = Program.objects.filter(dept=user_dept).order_by('name')
+        else:
+            program_choices = Program.objects.none()
+    else:
+        program_choices = Program.objects.order_by('name')
 
     return render(
         request,
@@ -839,7 +871,10 @@ def applications(request):
 @login_required(login_url='login')
 @require_http_methods(["GET"])
 def application_detail_api(request, app_id):
-    application = get_object_or_404(Application.objects.select_related('lead', 'program'), app_id=app_id)
+    application = get_object_or_404(
+        get_accessible_applications_qs(request.user).select_related('lead', 'program'),
+        app_id=app_id,
+    )
     lead = application.lead
     return JsonResponse(
         {
@@ -877,10 +912,20 @@ def application_create_api(request):
         return JsonResponse({'success': False, 'error': 'Lead and program are required.'}, status=400)
 
     lead = Lead.objects.filter(lead_id=lead_id).first()
-    program = Program.objects.filter(prog_id=program_id).first()
+    program = Program.objects.select_related('dept').filter(prog_id=program_id).first()
 
     if not lead or not program:
         return JsonResponse({'success': False, 'error': 'Invalid lead or program selected.'}, status=400)
+
+    user_role = get_user_role(request.user)
+    if user_role == 'staff':
+        user_dept = get_staff_department(request.user)
+        if not user_dept or program.dept_id != user_dept.dept_id:
+            return JsonResponse({'success': False, 'error': 'You can only create applications for your department.'}, status=403)
+
+        lead_in_department = get_accessible_leads_qs(request.user).filter(lead_id=lead.lead_id).exists()
+        if not lead_in_department:
+            return JsonResponse({'success': False, 'error': 'You can only use leads from your department.'}, status=403)
 
     if status_value not in dict(Application.STATUS_CHOICES):
         return JsonResponse({'success': False, 'error': 'Invalid status selected.'}, status=400)
@@ -903,7 +948,7 @@ def application_create_api(request):
 @login_required(login_url='login')
 @require_http_methods(["POST"])
 def application_update_api(request, app_id):
-    application = get_object_or_404(Application, app_id=app_id)
+    application = get_object_or_404(get_accessible_applications_qs(request.user), app_id=app_id)
 
     lead_id = (request.POST.get('lead_id') or '').strip()
     program_id = (request.POST.get('program_id') or '').strip()
@@ -918,10 +963,20 @@ def application_update_api(request, app_id):
         return JsonResponse({'success': False, 'error': 'Lead and program are required.'}, status=400)
 
     lead = Lead.objects.filter(lead_id=lead_id).first()
-    program = Program.objects.filter(prog_id=program_id).first()
+    program = Program.objects.select_related('dept').filter(prog_id=program_id).first()
 
     if not lead or not program:
         return JsonResponse({'success': False, 'error': 'Invalid lead or program selected.'}, status=400)
+
+    user_role = get_user_role(request.user)
+    if user_role == 'staff':
+        user_dept = get_staff_department(request.user)
+        if not user_dept or program.dept_id != user_dept.dept_id:
+            return JsonResponse({'success': False, 'error': 'You can only assign programs from your department.'}, status=403)
+
+        lead_in_department = get_accessible_leads_qs(request.user).filter(lead_id=lead.lead_id).exists()
+        if not lead_in_department:
+            return JsonResponse({'success': False, 'error': 'You can only assign leads from your department.'}, status=403)
 
     if status_value not in dict(Application.STATUS_CHOICES):
         return JsonResponse({'success': False, 'error': 'Invalid status selected.'}, status=400)
@@ -952,7 +1007,7 @@ def application_update_api(request, app_id):
 @login_required(login_url='login')
 @require_http_methods(["POST"])
 def application_delete_api(request, app_id):
-    application = get_object_or_404(Application, app_id=app_id)
+    application = get_object_or_404(get_accessible_applications_qs(request.user), app_id=app_id)
     application.delete()
     return JsonResponse({'success': True})
 
@@ -960,7 +1015,10 @@ def application_delete_api(request, app_id):
 @login_required(login_url='login')
 @require_http_methods(["POST"])
 def application_action_api(request, app_id):
-    application = get_object_or_404(Application.objects.select_related('lead', 'program'), app_id=app_id)
+    application = get_object_or_404(
+        get_accessible_applications_qs(request.user).select_related('lead', 'program'),
+        app_id=app_id,
+    )
     action = (request.POST.get('action') or '').strip().lower()
 
     action_map = {
@@ -998,7 +1056,10 @@ def application_action_api(request, app_id):
 @login_required(login_url='login')
 @require_http_methods(["POST"])
 def application_approve_api(request, app_id):
-    application = get_object_or_404(Application.objects.select_related('lead', 'program'), app_id=app_id)
+    application = get_object_or_404(
+        get_accessible_applications_qs(request.user).select_related('lead', 'program'),
+        app_id=app_id,
+    )
     
     if application.status != 'pending':
         return JsonResponse({'success': False, 'error': 'Only pending applications can be approved.'}, status=400)
@@ -1025,7 +1086,10 @@ def application_approve_api(request, app_id):
 @login_required(login_url='login')
 @require_http_methods(["POST"])
 def application_reject_api(request, app_id):
-    application = get_object_or_404(Application.objects.select_related('lead', 'program'), app_id=app_id)
+    application = get_object_or_404(
+        get_accessible_applications_qs(request.user).select_related('lead', 'program'),
+        app_id=app_id,
+    )
     
     if application.status != 'pending':
         return JsonResponse({'success': False, 'error': 'Only pending applications can be rejected.'}, status=400)
@@ -1052,7 +1116,10 @@ def application_reject_api(request, app_id):
 @login_required(login_url='login')
 @require_http_methods(["POST"])
 def application_restore_api(request, app_id):
-    application = get_object_or_404(Application.objects.select_related('lead', 'program'), app_id=app_id)
+    application = get_object_or_404(
+        get_accessible_applications_qs(request.user).select_related('lead', 'program'),
+        app_id=app_id,
+    )
     
     if application.status != 'rejected':
         return JsonResponse({'success': False, 'error': 'Only rejected applications can be restored.'}, status=400)
@@ -1078,7 +1145,7 @@ def application_restore_api(request, app_id):
 @login_required(login_url='login')
 @require_http_methods(["POST"])
 def application_permanent_delete_api(request, app_id):
-    application = get_object_or_404(Application, app_id=app_id)
+    application = get_object_or_404(get_accessible_applications_qs(request.user), app_id=app_id)
     lead_id = application.lead.lead_id
     application.delete()
     
@@ -1149,7 +1216,7 @@ def exam_detail_api(request):
     if not app_id:
         return JsonResponse({'success': False, 'error': 'Application ID is required.'}, status=400)
     
-    application = get_object_or_404(Application, app_id=app_id)
+    application = get_object_or_404(get_accessible_applications_qs(request.user), app_id=app_id)
     
     return JsonResponse({
         'success': True,
@@ -1175,7 +1242,7 @@ def submit_exam_info(request):
     exam_score = request.POST.get('exam_score')
     
     try:
-        application = get_object_or_404(Application, app_id=app_id)
+        application = get_object_or_404(get_accessible_applications_qs(request.user), app_id=app_id)
         from datetime import datetime
         exam_date_obj = datetime.strptime(exam_date, '%Y-%m-%d') if exam_date else timezone.now()
         
@@ -1218,7 +1285,7 @@ def approve_scholarship(request):
     app_id = request.POST.get('application_id')
     
     try:
-        application = get_object_or_404(Application, app_id=app_id)
+        application = get_object_or_404(get_accessible_applications_qs(request.user), app_id=app_id)
         score = Decimal(str(application.exam_score or '0'))
         is_failed = (application.exam_result == 'fail') or (score < Decimal('40'))
         course_fee = application.program.total_fee or Decimal('0')
@@ -1256,7 +1323,7 @@ def disapprove_scholarship(request):
     app_id = request.POST.get('application_id')
     
     try:
-        application = get_object_or_404(Application, app_id=app_id)
+        application = get_object_or_404(get_accessible_applications_qs(request.user), app_id=app_id)
         score = Decimal(str(application.exam_score or '0'))
         is_failed = (application.exam_result == 'fail') or (score < Decimal('40'))
         

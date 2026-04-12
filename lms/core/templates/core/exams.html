@@ -347,7 +347,7 @@
                     {% endif %}
                 </td>
                 <td>
-                    <button class="action-btn" onclick="editExamDetails({{ app.app_id }}, '{{ app.lead.first_name }} {{ app.lead.last_name }}', '{{ app.program.name }}')">Edit</button>
+                    <button class="action-btn" onclick="editExamDetails({{ app.app_id }}, '{{ app.lead.first_name|escapejs }} {{ app.lead.last_name|escapejs }}', '{{ app.program.name|escapejs }}')">Edit</button>
                     {% if app.exam_result == 'pass' %}
                     <button class="action-btn success" onclick="approveScholarship({{ app.app_id }})">Approve</button>
                     <button class="action-btn danger" onclick="disapproveScholarship({{ app.app_id }})">Disapprove</button>
@@ -474,11 +474,11 @@
 
 <script>
 function openExamModal(appId, applicantName, programName) {
+    document.getElementById('examForm').reset();
     document.getElementById('modalAppId').value = appId;
     document.getElementById('modalApplicantName').value = applicantName;
     document.getElementById('modalProgramName').value = programName;
     document.getElementById('examModalTitle').textContent = 'Enter Exam Information';
-    document.getElementById('examForm').reset();
     document.getElementById('examModal').classList.add('active');
 }
 
